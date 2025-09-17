@@ -2,9 +2,11 @@ import { useState } from "react";
 import "./App.css";
 import { startTodoList } from "./assets/data";
 import TodoList from "./components/TodoList/TodoList";
+import Time from "./components/Time/Time";
 
 function App() {
   const [todos, setTodos] = useState(startTodoList);
+
   const getOverdueTodos = () => {
     const today = new Date();
     return todos.filter(
@@ -20,19 +22,19 @@ function App() {
   const getCompletedTodos = () => {
     return todos.filter(todo => todo.isDone);
   };
-  const toggleTodo = id => {
+  const toggleTodo = (id: number) => {
     const updatedTodos = todos.map(todo => {
       if (todo.id === id) {
         return { ...todo, isDone: !todo.isDone };
       } else {
         return todo;
       }
-    })
+    });
     setTodos(updatedTodos);
   };
   return (
     <>
-      <h1>Todo List</h1>
+      <h1>Todo List</h1> <Time />
       <TodoList
         title='Overdue'
         items={getOverdueTodos()}
