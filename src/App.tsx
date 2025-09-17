@@ -1,33 +1,53 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
+import { startTodoList } from "./assets/data";
+import TodoList from "./components/TodoList/TodoList";
 
 function App() {
-  const [count, setCount] = useState(0);
-
+  const [todos, setTodos] = useState(startTodoList);
+  const getOverdueTodos = () => {
+    const today = new Date();
+    return todos.filter(
+      todo => !todo.isDone && new Date(todo.deadline) < today
+    );
+  };
+  const getActualTodos = () => {
+    const today = new Date();
+    return todos.filter(
+      todo => !todo.isDone && new Date(todo.deadline) >= today
+    );
+  };
+  const getCompletedTodos = () => {
+    return todos.filter(todo => todo.isDone);
+  };
+  const toggleTodo = id => {
+    const updatedTodos = todos.map(todo => {
+      if (todo.id === id) {
+        return { ...todo, isDone: !todo.isDone };
+      } else {
+        return todo;
+      }
+    })
+    setTodos(updatedTodos);
+  };
   return (
     <>
-      <div>
-        <a href='https://vite.dev' target='_blank'>
-          <img src={viteLogo} className='logo' alt='Vite logo' />
-        </a>
-        <a href='https://react.dev' target='_blank'>
-          <img src={reactLogo} className='logo react' alt='React logo' />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount(count => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Todo List</h1>
+      <TodoList
+        title='Overdue'
+        items={getOverdueTodos()}
+        onToggleTodo={toggleTodo}
+      />
+      <TodoList
+        title='Actual'
+        items={getActualTodos()}
+        onToggleTodo={toggleTodo}
+      />
+      <TodoList
+        title='Completed'
+        items={getCompletedTodos()}
+        onToggleTodo={toggleTodo}
+      />
     </>
   );
 }
