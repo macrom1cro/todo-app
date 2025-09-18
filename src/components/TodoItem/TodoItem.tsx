@@ -7,6 +7,9 @@ const ListElements = styled.li`
     margin-right: 15px;
   }
 `;
+const ListElementsSpan=styled.span`
+  text-decoration: ${({isDone}:unknown) => isDone ? "line-through" : "none"};
+`
 export interface ITodoItemProps {
   id: number;
   text: string;
@@ -26,9 +29,7 @@ export default function TodoItem({
   return (
     <ListElements>
       <input type='checkbox' checked={isDone} onChange={handleToggleTodo} />
-      <span style={{ textDecoration: isDone ? "line-through" : "none" }}>
-        {text}
-      </span>
+      <ListElementsSpan isDone={isDone}>{text}</ListElementsSpan>
     </ListElements>
   );
 }
