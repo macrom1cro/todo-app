@@ -3,6 +3,8 @@ import "./App.css";
 import { startTodoList } from "./assets/data";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
+import Button from "./components/Button/Button";
+import AddTodo from "./components/AddTodo/AddTodo";
 
 function App() {
   const [todos, setTodos] = useState(startTodoList);
@@ -32,9 +34,22 @@ function App() {
     });
     setTodos(updatedTodos);
   };
+  getTodo=()=>{
+    const updatedTodos = todos.map(todo => {
+      if (todo.id === id) {
+        return { ...todo, isDone: !todo.isDone };
+      } else {
+        return todo;
+      }
+    });
+    setTodos(updatedTodos);
+  }
   return (
     <>
-      <h1>Todo List</h1> <Time />
+      <Time />
+      <h1>Todo List</h1>
+      <AddTodo getTodo={getTodo()}/>
+
       <TodoList
         title='Overdue'
         items={getOverdueTodos()}
