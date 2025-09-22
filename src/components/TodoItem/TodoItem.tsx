@@ -14,7 +14,7 @@ const ListElements = styled.li`
   /* gap: 1rem; */
 `;
 const ListElementsSpan = styled.span<SpanProps>`
-  text-decoration: ${({ isDone }) => (isDone ? "line-through" : "none")};
+  text-decoration: ${({isDone}) => (isDone ? "line-through" : "none")};
 `;
 export interface ITodoItemProps {
   id: number;

@@ -3,11 +3,24 @@ import "./App.css";
 import { startTodoList } from "./assets/data";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
-import Button from "./components/Button/Button";
 import AddTodo from "./components/AddTodo/AddTodo";
+import type { ITodoItemProps } from "./components/TodoItem/TodoItem";
 
 function App() {
   const [todos, setTodos] = useState(startTodoList);
+  console.log(todos);
+
+  const addTodo = ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => {
+    setTodos([
+      ...todos,
+      {
+        id: todos[todos.length - 1].id + 1,
+        text,
+        isDone: false,
+        deadline: new Date().toISOString().slice(0, 10),
+      },
+    ]);
+  };
 
   const getOverdueTodos = () => {
     const today = new Date();
@@ -34,21 +47,21 @@ function App() {
     });
     setTodos(updatedTodos);
   };
-  getTodo=()=>{
-    const updatedTodos = todos.map(todo => {
-      if (todo.id === id) {
-        return { ...todo, isDone: !todo.isDone };
-      } else {
-        return todo;
-      }
-    });
-    setTodos(updatedTodos);
-  }
+  // getTodo=()=>{
+  //   const updatedTodos = todos.map(todo => {
+  //     if (todo.id === id) {
+  //       return { ...todo, isDone: !todo.isDone };
+  //     } else {
+  //       return todo;
+  //     }
+  //   });
+  //   setTodos(updatedTodos);
+  // }
   return (
     <>
       <Time />
       <h1>Todo List</h1>
-      <AddTodo getTodo={getTodo()}/>
+      <AddTodo addTodo={addTodo} />
 
       <TodoList
         title='Overdue'

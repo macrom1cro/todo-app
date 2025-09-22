@@ -1,20 +1,32 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import { useState, type ChangeEvent } from "react";
 import Button from "../Button/Button";
+import type { ITodoItemProps } from "../TodoItem/TodoItem";
 
 interface AddTodoProps {
-
+  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => void;
 }
 
-/**
- *
- */
-const AddTodo = ({onClick}: AddTodoProps): JSX.Element => {
-   const[toDo,setToDo] = useState()
+const DEFAULT_TODO = {
+  text: "",
+};
+
+const AddTodo = ({ addTodo }: AddTodoProps) => {
+  const [todo, setTodo] = useState(DEFAULT_TODO);
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+
+    setTodo({ ...todo, [name]: value });
+  };
   return (
     <>
-      <input className="inputToDo"></input>
-      <Button onClick={onClick}>Добавить</Button>
+      <input
+        type='text'
+        id='text'
+        name='text'
+        value={todo.text}
+        onChange={onChange}
+      ></input>
+      <Button onClick={() => addTodo({ text: todo.text })}>Добавить</Button>
     </>
   );
 };
