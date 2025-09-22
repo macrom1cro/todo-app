@@ -2,7 +2,7 @@ import styled from "styled-components";
 import Button from "../Button/Button";
 
 interface SpanProps {
-  isDone: boolean;
+  $isDone: boolean;
 }
 
 const ListElements = styled.li`
@@ -14,7 +14,7 @@ const ListElements = styled.li`
   /* gap: 1rem; */
 `;
 const ListElementsSpan = styled.span<SpanProps>`
-  text-decoration: ${({isDone}) => (isDone ? "line-through" : "none")};
+  text-decoration: ${({$isDone}) => ($isDone ? "line-through" : "none")};
 `;
 export interface ITodoItemProps {
   id: number;
@@ -37,7 +37,7 @@ export default function TodoItem({
       <Button>Редактировать</Button>
       <Button>Удалить</Button>
       <input type='checkbox' checked={isDone} onChange={handleToggleTodo} />
-      <ListElementsSpan isDone={isDone}>{text}</ListElementsSpan>
+      <ListElementsSpan $isDone={isDone}>{text}</ListElementsSpan>
     </ListElements>
   );
 }
