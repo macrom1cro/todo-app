@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from "react";
-import Button from "../Button/Button";
+import Button from '@mui/material/Button';
 import type { ITodoItemProps } from "../TodoItem/TodoItem";
+
 
 interface AddTodoProps {
   addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => void;
@@ -17,6 +18,10 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
 
     setTodo({ ...todo, [name]: value });
   };
+  const onClick = () => {
+    addTodo({ text: todo.text });
+    setTodo(DEFAULT_TODO);
+  };
   return (
     <>
       <input
@@ -26,7 +31,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
         value={todo.text}
         onChange={onChange}
       ></input>
-      <Button onClick={() => addTodo({ text: todo.text })}>Добавить</Button>
+      <Button variant="outlined" color="success" onClick={onClick}>Add</Button>
     </>
   );
 };

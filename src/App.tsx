@@ -21,6 +21,9 @@ function App() {
       },
     ]);
   };
+  const DeleteTodo = (id: number) => {
+    setTodos(todos.filter(todo => todo.id !== id));
+  };
 
   const getOverdueTodos = () => {
     const today = new Date();
@@ -47,16 +50,7 @@ function App() {
     });
     setTodos(updatedTodos);
   };
-  // getTodo=()=>{
-  //   const updatedTodos = todos.map(todo => {
-  //     if (todo.id === id) {
-  //       return { ...todo, isDone: !todo.isDone };
-  //     } else {
-  //       return todo;
-  //     }
-  //   });
-  //   setTodos(updatedTodos);
-  // }
+
   return (
     <>
       <Time />

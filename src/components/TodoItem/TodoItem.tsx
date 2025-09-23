@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import Button from "../Button/Button";
-
+import Button from '@mui/material/Button';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 interface SpanProps {
   $isDone: boolean;
 }
@@ -34,10 +34,10 @@ export default function TodoItem({
   };
   return (
     <ListElements>
-      <Button>Редактировать</Button>
-      <Button>Удалить</Button>
       <input type='checkbox' checked={isDone} onChange={handleToggleTodo} />
       <ListElementsSpan $isDone={isDone}>{text}</ListElementsSpan>
+      <Button variant="outlined" color="primary">Edit</Button>
+      <Button variant="outlined" color="error">Delete <DeleteForeverIcon/></Button>
     </ListElements>
   );
 }
