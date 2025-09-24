@@ -8,8 +8,7 @@ import type { ITodoItemProps } from "./components/TodoItem/TodoItem";
 
 function App() {
   const [todos, setTodos] = useState(startTodoList);
-  console.log(todos);
-
+  const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
   const addTodo = ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => {
     setTodos([
       ...todos,
@@ -24,6 +23,12 @@ function App() {
   const DeleteTodo = (id: number) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
+  const selectTodoIdForEdit = (id: number) => {
+    setTodoIdForEdit(id);
+  };
+  // const EditTodo = (id: number) => {
+  //   setTodos(todos.filter(todo => todo.id !== id));
+  // };
 
   const getOverdueTodos = () => {
     const today = new Date();
@@ -61,16 +66,25 @@ function App() {
         title='Overdue'
         items={getOverdueTodos()}
         onToggleTodo={toggleTodo}
+        DeleteTodo={DeleteTodo}
+        selectTodoIdForEdit={selectTodoIdForEdit}
+        todoIdForEdit={todoIdForEdit}
       />
       <TodoList
         title='Actual'
         items={getActualTodos()}
         onToggleTodo={toggleTodo}
+        DeleteTodo={DeleteTodo}
+        selectTodoIdForEdit={selectTodoIdForEdit}
+        todoIdForEdit={todoIdForEdit}
       />
       <TodoList
         title='Completed'
         items={getCompletedTodos()}
         onToggleTodo={toggleTodo}
+        DeleteTodo={DeleteTodo}
+        selectTodoIdForEdit={selectTodoIdForEdit}
+        todoIdForEdit={todoIdForEdit}
       />
     </>
   );

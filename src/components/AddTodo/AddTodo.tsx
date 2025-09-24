@@ -1,7 +1,8 @@
 import { useState, type ChangeEvent } from "react";
-import Button from '@mui/material/Button';
+import Button from "@mui/material/Button";
 import type { ITodoItemProps } from "../TodoItem/TodoItem";
-
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 
 interface AddTodoProps {
   addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => void;
@@ -24,17 +25,29 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
   };
   return (
     <>
-      <input
-        type='text'
-        id='text'
-        name='text'
-        value={todo.text}
-        onChange={onChange}
-      ></input>
-      <Button variant="outlined" color="success" onClick={onClick}>Add</Button>
+      <Grid
+        container
+        spacing={2}
+        direction='row'
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <TextField
+          type='text'
+          id='text'
+          size='small'
+          name='text'
+          value={todo.text}
+          onChange={onChange}
+        />
+        <Button variant='outlined' color='success' onClick={onClick}>
+          Add
+        </Button>
+      </Grid>
     </>
   );
 };
-// #endregion
 
 export default AddTodo;
