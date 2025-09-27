@@ -1,11 +1,13 @@
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import Button from "@mui/material/Button";
 import type { ITodoItemProps } from "../TodoItem/TodoItem";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 interface AddTodoProps {
-  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone"| "deadline">) => void;
+  addTodo: ({
+    text,
+  }: Omit<ITodoItemProps, "id" | "isDone" | "deadline">) => void;
 }
 
 const DEFAULT_TODO = {
@@ -14,26 +16,45 @@ const DEFAULT_TODO = {
 
 const AddTodo = ({ addTodo }: AddTodoProps) => {
   const [todo, setTodo] = useState(DEFAULT_TODO);
+  const [error, setError] = useState("");
+
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setTodo({ ...todo, [name]: value });
+
+    if (error && value.trim() !== "") {
+      setError("");
+    }
   };
+
+  const onKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      onClick();
+    }
+  };
+
   const onClick = () => {
+    if (todo.text.trim() === "") {
+      setError("The field cannot be empty");
+      return;
+    }
+
     addTodo({ text: todo.text });
     setTodo(DEFAULT_TODO);
+    setError("");
   };
   return (
-    <>
-      <Grid
-        container
-        spacing={2}
-        direction='row'
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+    <Grid
+      container
+      spacing={2}
+      direction='row'
+      sx={{
+        justifyContent: "center",
+        marginBottom: 2,
+      }}
+    >
+      <Grid size={{ xs: 12, sm: 8, md: 6 }}>
         <TextField
           type='text'
           id='text'
@@ -41,12 +62,26 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
           name='text'
           value={todo.text}
           onChange={onChange}
+          onKeyDown={onKeyPress}
+          placeholder='Enter a task'
+          label='Add task'
+          error={!!error}
+          helperText={error}
+          fullWidth
         />
-        <Button variant='outlined' color='success' onClick={onClick}>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4, md: 1 }}>
+        <Button
+          variant='outlined'
+          color='success'
+          onClick={onClick}
+
+          // disabled={todo.text.trim() === ""}
+        >
           Add
         </Button>
       </Grid>
-    </>
+    </Grid>
   );
 };
 

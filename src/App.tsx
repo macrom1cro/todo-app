@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
-import { startTodoList } from "./assets/data";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
 import type { ITodoItemProps } from "./components/TodoItem/TodoItem";
 import Typography from "@mui/material/Typography";
+import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
+
+const TODOS_STORAGE_KEY = "todo-app-tasks";
 
 function App() {
-  const [todos, setTodos] = useState(startTodoList);
+  const [todos, setTodos] = useState<ITodoItemProps[]>(() =>
+    loadTodosFromStorage(TODOS_STORAGE_KEY)
+  );
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
+
+  useEffect(() => {
+    saveTodosToStorage(todos, TODOS_STORAGE_KEY);
+  }, [todos]);
+
   const addTodo = ({
     text,
   }: Omit<ITodoItemProps, "id" | "isDone" | "deadline">) => {
@@ -18,7 +27,7 @@ function App() {
     setTodos([
       ...todos,
       {
-        id: todos.length > 0 ? todos[todos.length - 1].id + 1 : 1,
+        id: todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1,
         text,
         isDone: false,
         deadline: currentDate.toISOString().slice(0, 10),

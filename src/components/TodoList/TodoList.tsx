@@ -37,7 +37,7 @@ export default function TodoList({
           onCancel={() => selectTodoIdForEdit(null)}
         />
       )}
-      <Grid container direction='column' rowSpacing={1}>
+      <Grid container direction='column' rowSpacing={2}>
         {items.map(todo => (
           <TodoItem
             key={todo.id}

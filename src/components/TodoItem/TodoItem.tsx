@@ -25,59 +25,59 @@ export default function TodoItem({
   selectTodoIdForEdit,
 }: ITodoItemProps) {
   return (
-    <>
-      <Grid
-        container
-        spacing={1}
-        columns={6}
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Grid size='auto'>
-          <Checkbox
-            checked={isDone}
-            onChange={() => {
-              onToggleTodo?.(id);
-            }}
-          />
-        </Grid>
-        <Grid size={2}>
-          <Typography
-            variant='h6'
-            sx={{
-              wordWrap: "break-word",
-              textDecoration: () => (isDone ? "line-through" : "none"),
-            }}
-          >
-            {text}
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            Deadline: {deadline}
-          </Typography>
-        </Grid>
-        <Grid container spacing={1} size='auto'>
-          <Button
-            variant='outlined'
-            color='primary'
-            onClick={() => {
-              selectTodoIdForEdit?.(id);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant='outlined'
-            color='error'
-            onClick={() => {
-              DeleteTodo?.(id);
-            }}
-          >
-            Delete <DeleteForeverIcon />
-          </Button>
-        </Grid>
+    <Grid
+      container
+      spacing={2}
+      columns={12}
+      sx={{
+        justifyContent: "center",
+        alignItems: "center",
+        border: 1,
+        borderRadius: 5,
+      }}
+    >
+      <Grid size='auto'>
+        <Checkbox
+          checked={isDone}
+          onChange={() => {
+            onToggleTodo?.(id);
+          }}
+        />
       </Grid>
-    </>
+      <Grid size={6}>
+        <Typography
+          variant='h6'
+          sx={{
+            wordWrap: "break-word",
+            textDecoration: () => (isDone ? "line-through" : "none"),
+          }}
+        >
+          {text}
+        </Typography>
+        <Typography variant='body2' color='text.secondary'>
+          Deadline: {deadline}
+        </Typography>
+      </Grid>
+      <Grid container spacing={1} size='auto'>
+        <Button
+          variant='outlined'
+          color='primary'
+          onClick={() => {
+            selectTodoIdForEdit?.(id);
+          }}
+        >
+          Edit
+        </Button>
+        <Button
+          variant='outlined'
+          color='error'
+          onClick={() => {
+            DeleteTodo?.(id);
+          }}
+        >
+          Delete <DeleteForeverIcon />
+        </Button>
+      </Grid>
+    </Grid>
   );
 }

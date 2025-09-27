@@ -45,46 +45,48 @@ export default function EditTodo({
     }
   };
   return (
-    <Grid
-      container
-      spacing={2}
-      sx={{
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 2,
-      }}
-    >
-      <Grid size={{ xs: 12, sm: 8, md: 6 }}>
-        <TextField
-          type='text'
-          size='small'
-          value={editedText}
-          onChange={onChange}
-          onKeyDown={onKeyPress}
-          placeholder='Editing task'
-          fullWidth
-          label='Edit'
-          autoFocus
-        />
-      </Grid>
+    <>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: 2,
+        }}
+      >
+        <Grid size={{ xs: 12, sm: 8, md: 5 }}>
+          <TextField
+            type='text'
+            size='small'
+            value={editedText}
+            onChange={onChange}
+            onKeyDown={onKeyPress}
+            placeholder='Enter a new text of task'
+            fullWidth
+            label='Edit task'
+            autoFocus
+          />
+        </Grid>
 
-      <Grid size={{ xs: 6, sm: 2, md: 1 }}>
-        <Button
-          variant='outlined'
-          color='success'
-          onClick={onSave}
-          disabled={editedText.trim() === ""}
-          fullWidth
-        >
-          Сохранить
-        </Button>
-      </Grid>
+        <Grid size={{ xs: 6, sm: 2, md: 1 }}>
+          <Button
+            variant='outlined'
+            color='success'
+            onClick={onSave}
+            disabled={editedText.trim() === ""}
+            fullWidth
+          >
+            Save
+          </Button>
+        </Grid>
 
-      <Grid size={{ xs: 6, sm: 2, md: 1 }}>
-        <Button variant='outlined' color='error' onClick={onCancel} fullWidth>
-          Отмена
-        </Button>
+        <Grid size={{ xs: 6, sm: 2, md: 1 }}>
+          <Button variant='outlined' color='error' onClick={onCancel} fullWidth>
+            Cancel
+          </Button>
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 }
