@@ -1,53 +1,90 @@
-import { useState, type ChangeEvent } from "react";
+import {
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+  useEffect,
+} from "react";
 import Button from "@mui/material/Button";
 import type { ITodoItemProps } from "../TodoItem/TodoItem";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 interface EditTodoProps {
-  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => void;
+  todo: ITodoItemProps;
+  onSaveEdit: (id: number, newText: string) => void;
+  onCancel: () => void;
 }
 
-const DEFAULT_TODO = {
-  text: "1231",
-};
+export default function EditTodo({
+  todo,
+  onSaveEdit,
+  onCancel,
+}: EditTodoProps) {
+  const [editedText, setEditedText] = useState(todo.text);
 
-const EditTodo = ({ addTodo }: EditTodoProps) => {
-  const [todo, setTodo] = useState(DEFAULT_TODO);
+  useEffect(() => {
+    setEditedText(todo.text);
+  }, [todo]);
+
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-
-    setTodo({ ...todo, [name]: value });
+    setEditedText(event.target.value);
   };
-  const onClick = () => {
-    addTodo({ text: todo.text });
-    setTodo(DEFAULT_TODO);
+
+  const onKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && editedText.trim() !== "") {
+      onSaveEdit(todo.id, editedText);
+    }
+    if (event.key === "Escape") {
+      onCancel();
+    }
+  };
+
+  const onSave = () => {
+    if (editedText.trim() !== "") {
+      onSaveEdit(todo.id, editedText);
+    }
   };
   return (
-    <>
-      <Grid
-        container
-        spacing={2}
-        direction='row'
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+    <Grid
+      container
+      spacing={2}
+      sx={{
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 2,
+      }}
+    >
+      <Grid size={{ xs: 12, sm: 8, md: 6 }}>
         <TextField
           type='text'
-          id='text'
           size='small'
-          name='text'
-          value={todo.text}
+          value={editedText}
           onChange={onChange}
+          onKeyDown={onKeyPress}
+          placeholder='Editing task'
+          fullWidth
+          label='Edit'
+          autoFocus
         />
-        <Button variant='outlined' color='success' onClick={onClick}>
-          Add
+      </Grid>
+
+      <Grid size={{ xs: 6, sm: 2, md: 1 }}>
+        <Button
+          variant='outlined'
+          color='success'
+          onClick={onSave}
+          disabled={editedText.trim() === ""}
+          fullWidth
+        >
+          Сохранить
         </Button>
       </Grid>
-    </>
-  );
-};
 
-export default EditTodo;
+      <Grid size={{ xs: 6, sm: 2, md: 1 }}>
+        <Button variant='outlined' color='error' onClick={onCancel} fullWidth>
+          Отмена
+        </Button>
+      </Grid>
+    </Grid>
+  );
+}

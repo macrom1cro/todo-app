@@ -5,30 +5,38 @@ import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
 import type { ITodoItemProps } from "./components/TodoItem/TodoItem";
+import Typography from "@mui/material/Typography";
 
 function App() {
   const [todos, setTodos] = useState(startTodoList);
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
-  const addTodo = ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => {
+  const addTodo = ({
+    text,
+  }: Omit<ITodoItemProps, "id" | "isDone" | "deadline">) => {
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + 10);
     setTodos([
       ...todos,
       {
-        id: todos[todos.length - 1].id + 1,
+        id: todos.length > 0 ? todos[todos.length - 1].id + 1 : 1,
         text,
         isDone: false,
-        deadline: new Date().toISOString().slice(0, 10),
+        deadline: currentDate.toISOString().slice(0, 10),
       },
     ]);
   };
   const DeleteTodo = (id: number) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
-  const selectTodoIdForEdit = (id: number) => {
+  const selectTodoIdForEdit = (id: number | null) => {
     setTodoIdForEdit(id);
   };
-  // const EditTodo = (id: number) => {
-  //   setTodos(todos.filter(todo => todo.id !== id));
-  // };
+  const handleSaveEdit = (id: number, newText: string) => {
+    setTodos(
+      todos.map(todo => (todo.id === id ? { ...todo, text: newText } : todo))
+    );
+    setTodoIdForEdit(null);
+  };
 
   const getOverdueTodos = () => {
     const today = new Date();
@@ -59,7 +67,7 @@ function App() {
   return (
     <>
       <Time />
-      <h1>Todo List</h1>
+      <Typography variant='h1'>Todo List</Typography>
       <AddTodo addTodo={addTodo} />
 
       <TodoList
@@ -69,6 +77,7 @@ function App() {
         DeleteTodo={DeleteTodo}
         selectTodoIdForEdit={selectTodoIdForEdit}
         todoIdForEdit={todoIdForEdit}
+        onSaveEdit={handleSaveEdit}
       />
       <TodoList
         title='Actual'
@@ -77,6 +86,7 @@ function App() {
         DeleteTodo={DeleteTodo}
         selectTodoIdForEdit={selectTodoIdForEdit}
         todoIdForEdit={todoIdForEdit}
+        onSaveEdit={handleSaveEdit}
       />
       <TodoList
         title='Completed'
@@ -85,6 +95,7 @@ function App() {
         DeleteTodo={DeleteTodo}
         selectTodoIdForEdit={selectTodoIdForEdit}
         todoIdForEdit={todoIdForEdit}
+        onSaveEdit={handleSaveEdit}
       />
     </>
   );

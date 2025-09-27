@@ -4,25 +4,12 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Checkbox from "@mui/material/Checkbox";
-// interface SpanProps {
-//   $isDone: boolean;
-// }
 
-// const ListElements = styled.li`
-//   list-style: none;
-//   display: flex;
-//   flex-flow: row nowrap;
-//   justify-content: space-between;
-//   align-items: center;
-//   /* gap: 1rem; */
-// `;
-// const ListElementsSpan = styled.span<SpanProps>`
-//   text-decoration: ${({ $isDone }) => ($isDone ? "line-through" : "none")};
-// `;
 export interface ITodoItemProps {
   id: number;
   text: string;
   isDone: boolean;
+  deadline: string;
   onToggleTodo?: (id: number) => void;
   DeleteTodo?: (id: number) => void;
   selectTodoIdForEdit?: (id: number) => void;
@@ -32,16 +19,11 @@ export default function TodoItem({
   id,
   text,
   isDone,
+  deadline,
   onToggleTodo,
   DeleteTodo,
   selectTodoIdForEdit,
 }: ITodoItemProps) {
-  // const handleToggleTodo = () => {
-  //   onToggleTodo?.(id);
-  // };
-  // const onClick = () => {
-  //   DeleteTodo?.(id);
-  // };
   return (
     <>
       <Grid
@@ -70,6 +52,9 @@ export default function TodoItem({
             }}
           >
             {text}
+          </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            Deadline: {deadline}
           </Typography>
         </Grid>
         <Grid container spacing={1} size='auto'>

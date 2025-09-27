@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 interface AddTodoProps {
-  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone">) => void;
+  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone"| "deadline">) => void;
 }
 
 const DEFAULT_TODO = {

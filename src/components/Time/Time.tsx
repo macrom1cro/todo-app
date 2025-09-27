@@ -1,3 +1,4 @@
+import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 
 export default function Time() {
@@ -10,5 +11,12 @@ export default function Time() {
       clearInterval(timerId);
     };
   }, []);
-  return <span>Время сейчас: {nowTime.toLocaleTimeString()}</span>;
+  return (
+    <>
+      <Typography variant='h6'>
+        The time is now: {nowTime.toLocaleTimeString()}
+      </Typography>
+      ;
+    </>
+  );
 }
