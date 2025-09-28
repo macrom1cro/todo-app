@@ -5,28 +5,22 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 interface AddTodoProps {
-  addTodo: ({
-    text,
-  }: Omit<ITodoItemProps, "id" | "isDone" | "date">) => void;
+  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone" | "date">) => void;
 }
 
-const DEFAULT_TODO = {
-  text: "",
-};
-
 const AddTodo = ({ addTodo }: AddTodoProps) => {
-  const [todo, setTodo] = useState(DEFAULT_TODO);
+  const [text, setText] = useState("");
   const [error, setError] = useState("");
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+    const { value } = event.target;
 
-    setTodo({ ...todo, [name]: value });
+    setText(value);
 
     if (error && value.trim() !== "") {
       setError("");
     }
-    return
+    return;
   };
 
   const onKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -36,13 +30,13 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
   };
 
   const onClick = () => {
-    if (todo.text.trim() === "") {
+    if (text.trim() === "") {
       setError("The field cannot be empty");
       return;
     }
 
-    addTodo({ text: todo.text });
-    setTodo(DEFAULT_TODO);
+    addTodo({ text: text });
+    setText("");
     setError("");
   };
   return (
@@ -61,7 +55,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
           id='text'
           size='small'
           name='text'
-          value={todo.text}
+          value={text}
           onChange={onChange}
           onKeyDown={onKeyPress}
           placeholder='Enter a task'
@@ -72,11 +66,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4, md: 1 }}>
-        <Button
-          variant='outlined'
-          color='success'
-          onClick={onClick}
-        >
+        <Button variant='outlined' color='success' onClick={onClick}>
           Add
         </Button>
       </Grid>

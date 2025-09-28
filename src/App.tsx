@@ -46,7 +46,7 @@ const AppContent = () => {
         id: todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1,
         text,
         isDone: false,
-        date: new Date().toLocaleDateString("ru-RU"),
+        date: new Date(),
       },
     ]);
   };
@@ -77,9 +77,9 @@ const AppContent = () => {
 
     const sortedTodos = [...filteredTodos].sort((a, b) => {
       if (sortOrder === "newest") {
-        return b.id - a.id;
+        return b.date.getTime() - a.date.getTime();
       } else {
-        return a.id - b.id;
+        return a.date.getTime() - b.date.getTime();
       }
     });
 
