@@ -7,7 +7,7 @@ import Grid from "@mui/material/Grid";
 interface AddTodoProps {
   addTodo: ({
     text,
-  }: Omit<ITodoItemProps, "id" | "isDone" | "deadline">) => void;
+  }: Omit<ITodoItemProps, "id" | "isDone" | "date">) => void;
 }
 
 const DEFAULT_TODO = {
@@ -26,6 +26,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
     if (error && value.trim() !== "") {
       setError("");
     }
+    return
   };
 
   const onKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -75,8 +76,6 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
           variant='outlined'
           color='success'
           onClick={onClick}
-
-          // disabled={todo.text.trim() === ""}
         >
           Add
         </Button>
