@@ -37,9 +37,7 @@ const AppContent = () => {
     saveTodosToStorage(todos, TODOS_STORAGE_KEY);
   }, [todos]);
 
-  const addTodo = ({
-    text,
-  }: Omit<ITodoItemProps, "id" | "isDone" | "date">) => {
+  const addTodo = (text: string) => {
     setTodos([
       ...todos,
       {

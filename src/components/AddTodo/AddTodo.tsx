@@ -1,11 +1,10 @@
 import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import Button from "@mui/material/Button";
-import type { ITodoItemProps } from "../TodoItem/TodoItem";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
-interface AddTodoProps {
-  addTodo: ({ text }: Omit<ITodoItemProps, "id" | "isDone" | "date">) => void;
+export interface AddTodoProps {
+  addTodo: (text: string) => void;
 }
 
 const AddTodo = ({ addTodo }: AddTodoProps) => {
@@ -35,7 +34,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
       return;
     }
 
-    addTodo({ text: text });
+    addTodo(text);
     setText("");
     setError("");
   };
