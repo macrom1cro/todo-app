@@ -8,14 +8,6 @@ import Box from "@mui/material/Box";
 import styled from "styled-components";
 import type { Theme } from "../../theme/themes";
 
-// const TodoContainer = styled.div<{ theme: Theme }>`
-//   background-color: ${props => props.theme.todoBackground};
-//   border: 1px solid ${props => props.theme.border};
-//   border-radius: 8px;
-//   padding: 16px;
-//   margin-bottom: 16px;
-//   transition: all 0.3s ease;
-// `;
 const StyledPaper = styled(Paper)<{ theme: Theme }>`
   background-color: ${props => props.theme.todoBackground};
   border: 1px solid ${props => props.theme.border};
