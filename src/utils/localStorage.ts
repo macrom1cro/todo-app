@@ -1,4 +1,7 @@
 import type { ITodoItemProps } from "../components/TodoItem/TodoItem";
+import axios from "axios";
+
+const API_URL = "http://localhost:3001";
 
 export const loadTodosFromStorage = (key: string): ITodoItemProps[] => {
   try {
@@ -26,4 +29,23 @@ export const saveTodosToStorage = (todos: ITodoItemProps[], key: string) => {
   } catch (error) {
     console.error("Error save todos to localStorage:", error);
   }
+};
+
+export const fetchTodos = async (
+  page: number,
+  limit: number,
+  filter: "active" | "completed" | "all"
+) => {
+  const response = await axios.get(
+    `${API_URL}/todos?page=${page}&limit=${limit}&filter=${filter}`
+  );
+  return response.data;
+};
+
+export const addTodo = async (text : string) => {
+  await axios.post(`${API_URL}/todos`, { text });
+};
+
+export const deleteTodo = async (id : number) => {
+  await axios.delete(`${API_URL}/todos/${id}`);
 };
