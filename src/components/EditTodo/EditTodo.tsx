@@ -5,12 +5,12 @@ import {
   useEffect,
 } from "react";
 import Button from "@mui/material/Button";
-import type { ITodoItemProps } from "../TodoItem/TodoItem";
+import type { ITodoItem} from "../TodoItem/TodoItem";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 interface EditTodoProps {
-  todo: ITodoItemProps;
+  todo: ITodoItem;
   onSaveEdit: (id: number, newText: string) => void;
   onCancel: () => void;
 }

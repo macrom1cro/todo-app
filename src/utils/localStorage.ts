@@ -1,16 +1,13 @@
-import type { ITodoItemProps } from "../components/TodoItem/TodoItem";
-import axios from "axios";
+import type { ITodoItem } from "../components/TodoItem/TodoItem";
 
-const API_URL = "http://localhost:3001";
-
-export const loadTodosFromStorage = (key: string): ITodoItemProps[] => {
+export const loadTodosFromStorage = (key: string): ITodoItem[] => {
   try {
     const savedTodos = localStorage.getItem(key);
     if (savedTodos) {
       const parsed = JSON.parse(savedTodos);
-      return parsed.map((todo: ITodoItemProps) => ({
+      return parsed.map((todo: ITodoItem) => ({
         ...todo,
-        date: new Date(todo.date),
+        createdAt: new Date(todo.createdAt),
       }));
     }
   } catch (error) {
@@ -19,33 +16,14 @@ export const loadTodosFromStorage = (key: string): ITodoItemProps[] => {
   return [];
 };
 
-export const saveTodosToStorage = (todos: ITodoItemProps[], key: string) => {
+export const saveTodosToStorage = (todos: ITodoItem[], key: string) => {
   try {
     const todosToSave = todos.map(todo => ({
       ...todo,
-      date: todo.date.toISOString(),
+      createdAt: todo.createdAt.toISOString(),
     }));
     localStorage.setItem(key, JSON.stringify(todosToSave));
   } catch (error) {
     console.error("Error save todos to localStorage:", error);
   }
-};
-
-export const fetchTodos = async (
-  page: number,
-  limit: number,
-  filter: "active" | "completed" | "all"
-) => {
-  const response = await axios.get(
-    `${API_URL}/todos?page=${page}&limit=${limit}&filter=${filter}`
-  );
-  return response.data;
-};
-
-export const addTodo = async (text : string) => {
-  await axios.post(`${API_URL}/todos`, { text });
-};
-
-export const deleteTodo = async (id : number) => {
-  await axios.delete(`${API_URL}/todos/${id}`);
 };

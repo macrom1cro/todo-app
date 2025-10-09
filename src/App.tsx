@@ -3,7 +3,7 @@ import styled from "styled-components";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
-import type { ITodoItemProps } from "./components/TodoItem/TodoItem";
+import type { ITodoItem } from "./components/TodoItem/TodoItem";
 import Typography from "@mui/material/Typography";
 import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -14,6 +14,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import type { Theme } from "./theme/themes";
+import { todosApi } from "./api/todosApi";
 
 const TODOS_STORAGE_KEY = "todo-app-tasks";
 
@@ -26,9 +27,32 @@ const AppContainer = styled.div<{ theme: Theme }>`
 `;
 
 const AppContent = () => {
-  const [todos, setTodos] = useState<ITodoItemProps[]>(() =>
-    loadTodosFromStorage(TODOS_STORAGE_KEY)
+  const [todos, setTodos] = useState<ITodoItem[]>([]
+    // () =>
+    // loadTodosFromStorage(TODOS_STORAGE_KEY)
   );
+  //   const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState(null);
+    const fetchUsers = async () => {
+    // setLoading(true);
+    // setError(null);
+    try {
+      const response = await todosApi.getTodos();
+      console.log(response.data)
+      setTodos(response.data);
+      console.log(todos)
+    } catch (err) {
+      console.error("Error load todos from localStorage:", err);
+      // setError(err.message);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filter, setFilter] = useState<"all" | "completed" | "active">("all");
@@ -43,8 +67,8 @@ const AppContent = () => {
       {
         id: todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1,
         text,
-        isDone: false,
-        date: new Date(),
+        completed: false,
+        createdAt: new Date(),
       },
     ]);
   };
@@ -68,16 +92,16 @@ const AppContent = () => {
     let filteredTodos = todos;
 
     if (filter === "completed") {
-      filteredTodos = todos.filter(todo => todo.isDone);
+      filteredTodos = todos.filter(todo => todo.completed);
     } else if (filter === "active") {
-      filteredTodos = todos.filter(todo => !todo.isDone);
+      filteredTodos = todos.filter(todo => !todo.completed);
     }
 
     const sortedTodos = [...filteredTodos].sort((a, b) => {
       if (sortOrder === "newest") {
-        return b.date.getTime() - a.date.getTime();
+        return b.createdAt.getTime() - a.createdAt.getTime();
       } else {
-        return a.date.getTime() - b.date.getTime();
+        return a.createdAt.getTime() - b.createdAt.getTime();
       }
     });
 
@@ -86,7 +110,7 @@ const AppContent = () => {
   const toggleTodo = (id: number) => {
     setTodos(
       todos.map(todo =>
-        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
+        todo.id === id ? { ...todo, isDone: !todo.completed } : todo
       )
     );
   };

@@ -1,11 +1,11 @@
 import Grid from "@mui/material/Grid";
-import TodoItem, { type ITodoItemProps } from "../TodoItem/TodoItem";
+import TodoItem, { type ITodoItem } from "../TodoItem/TodoItem";
 import EditTodo from "../EditTodo/EditTodo";
 // import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 export interface ITodoListProps {
-  items: ITodoItemProps[];
+  items: ITodoItem[];
   todoIdForEdit: number | null;
   onToggleTodo?: (id: number) => void;
   deleteTodo?: (id: number) => void;

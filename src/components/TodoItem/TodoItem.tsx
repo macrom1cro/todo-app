@@ -20,11 +20,11 @@ const StyledPaper = styled(Paper)<{ theme: Theme }>`
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 `;
-export interface ITodoItemProps {
+export interface ITodoItem {
   id: number;
   text: string;
-  isDone: boolean;
-  date: Date;
+  completed: boolean;
+  createdAt: Date;
   onToggleTodo?: (id: number) => void;
   deleteTodo?: (id: number) => void;
   selectTodoIdForEdit?: (id: number) => void;
@@ -33,12 +33,12 @@ export interface ITodoItemProps {
 export default function TodoItem({
   id,
   text,
-  isDone,
-  date,
+  completed,
+  createdAt,
   onToggleTodo,
   deleteTodo,
   selectTodoIdForEdit,
-}: ITodoItemProps) {
+}: ITodoItem) {
   return (
     <StyledPaper elevation={2} sx={{ p: 1 }}>
       <Box sx={{ width: "100%", mb: 2 }}>
@@ -54,7 +54,7 @@ export default function TodoItem({
         >
           <Grid>
             <Checkbox
-              checked={isDone}
+              checked={completed}
               onChange={() => {
                 onToggleTodo?.(id);
               }}
@@ -67,14 +67,14 @@ export default function TodoItem({
                 wordWrap: "break-word",
                 wordBreak: "break-word",
                 overflowWrap: "break-word",
-                textDecoration: () => (isDone ? "line-through" : "none"),
+                textDecoration: () => (completed ? "line-through" : "none"),
                 whiteSpace: "normal",
               }}
             >
               {text}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              date: {date.toLocaleString("ru-RU")}
+              date: {createdAt.toLocaleString("ru-RU")}
             </Typography>
           </Grid>
           <Grid sx={{ flexShrink: 0 }}>
