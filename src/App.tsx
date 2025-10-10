@@ -5,7 +5,7 @@ import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
 import type { ITodoItem } from "./components/TodoItem/TodoItem";
 import Typography from "@mui/material/Typography";
-import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
+// import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
 import Stack from "@mui/material/Stack";
@@ -16,7 +16,7 @@ import MenuItem from "@mui/material/MenuItem";
 import type { Theme } from "./theme/themes";
 import { todosApi } from "./api/todosApi";
 
-const TODOS_STORAGE_KEY = "todo-app-tasks";
+// const TODOS_STORAGE_KEY = "todo-app-tasks";
 
 const AppContainer = styled.div<{ theme: Theme }>`
   background-color: ${props => props.theme.body};
@@ -27,28 +27,25 @@ const AppContainer = styled.div<{ theme: Theme }>`
 `;
 
 const AppContent = () => {
-  const [todos, setTodos] = useState<ITodoItem[]>([]
-    // () =>
-    // loadTodosFromStorage(TODOS_STORAGE_KEY)
+  const [todos, setTodos] = useState<ITodoItem[]>(
+    []
+    // () => loadTodosFromStorage(TODOS_STORAGE_KEY)
   );
   //   const [loading, setLoading] = useState(false);
   // const [error, setError] = useState(null);
-    const fetchUsers = async () => {
+  const fetchUsers = async () => {
     // setLoading(true);
     // setError(null);
     try {
       const response = await todosApi.getTodos();
-      console.log(response.data)
-      setTodos(response.data);
-      console.log(todos)
+      setTodos(response.data.data);
     } catch (err) {
-      console.error("Error load todos from localStorage:", err);
+      console.error("Error load todos from api:", err);
       // setError(err.message);
     } finally {
       // setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -57,24 +54,32 @@ const AppContent = () => {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [filter, setFilter] = useState<"all" | "completed" | "active">("all");
 
-  useEffect(() => {
-    saveTodosToStorage(todos, TODOS_STORAGE_KEY);
-  }, [todos]);
-
-  const addTodo = (text: string) => {
-    setTodos([
-      ...todos,
-      {
-        id: todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1,
-        text,
-        completed: false,
-        createdAt: new Date(),
-      },
-    ]);
+  // useEffect(() => {
+  //   saveTodosToStorage(todos, TODOS_STORAGE_KEY);
+  // }, [todos]);
+  const addTodo = async (text: string) => {
+    try {
+      const response = await todosApi.addTodo(text);
+      setTodos([...todos, response.data]);
+      // setTodos(response.data.data);
+    } catch (err) {
+      console.error("Error add todos on api:", err);
+      // setError(err.message);
+    } finally {
+      // setLoading(false);
+    }
   };
 
-  const deleteTodo = (id: number) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+  const deleteTodo = async (id: number) => {
+    try {
+      await todosApi.deleteTodo(id);
+      setTodos(todos.filter(todo => todo.id !== id));
+    } catch (err) {
+      console.error("Error add todos on api:", err);
+      // setError(err.message);
+    } finally {
+      // setLoading(false);
+    }
   };
 
   const selectTodoIdForEdit = (id: number | null) => {
@@ -96,23 +101,33 @@ const AppContent = () => {
     } else if (filter === "active") {
       filteredTodos = todos.filter(todo => !todo.completed);
     }
-
     const sortedTodos = [...filteredTodos].sort((a, b) => {
+      const createDateA = new Date(a.createdAt).getTime();
+      const createDateB = new Date(b.createdAt).getTime();
       if (sortOrder === "newest") {
-        return b.createdAt.getTime() - a.createdAt.getTime();
+        return createDateB - createDateA;
       } else {
-        return a.createdAt.getTime() - b.createdAt.getTime();
+        return createDateA - createDateB;
       }
     });
 
     return sortedTodos;
   };
-  const toggleTodo = (id: number) => {
-    setTodos(
-      todos.map(todo =>
-        todo.id === id ? { ...todo, isDone: !todo.completed } : todo
-      )
-    );
+  const toggleTodo = async (id: number) => {
+    try {
+      await todosApi.editTodoCompleted(id);
+      setTodos(
+        todos.map(todo =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+      );
+      // setTodos([...todos, response.data]);
+    } catch (err) {
+      console.error("Error add todos on api:", err);
+      // setError(err.message);
+    } finally {
+      // setLoading(false);
+    }
   };
   return (
     <AppContainer>

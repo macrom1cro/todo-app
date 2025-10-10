@@ -9,7 +9,7 @@ export const todosApi = {
   addTodo: (text: string) => api.post(`/todos`, { text }),
   editTodo: (id: number, text: string, completed: boolean) =>
     api.post(`/todos/${id}`, { text, completed }),
-  editTodoCompleted: (id: number) => api.post(`/todos/${id}/toggle`),
+  editTodoCompleted: (id: number) => api.patch(`/todos/${id}/toggle`),
   deleteTodo: (id: number) => api.delete(`/todos/${id}`),
 };
 

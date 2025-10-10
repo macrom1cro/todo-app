@@ -74,7 +74,7 @@ export default function TodoItem({
               {text}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              date: {createdAt.toLocaleString("ru-RU")}
+              date: {new Date(createdAt).toLocaleString("ru-RU")}
             </Typography>
           </Grid>
           <Grid sx={{ flexShrink: 0 }}>
