@@ -43,13 +43,15 @@ const AppContent = () => {
 
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState("");
   useEffect(() => {
     setLoading(true);
+    setError("");
     try {
       dispatch(fetchTodos({ page, limit, filter, sortOrder }));
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError("No fetchTodos");
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -65,10 +67,12 @@ const AppContent = () => {
   };
 
   const handleAddTodo = async (text: string) => {
+    setError("");
     try {
       await dispatch(addTodo(text)).unwrap();
       dispatch(fetchTodos({ page, limit, filter, sortOrder }));
     } catch (err) {
+      setError("No connection to the server");
       console.error("Error adding todo:", err);
     }
   };
@@ -119,6 +123,14 @@ const AppContent = () => {
       </Typography>
       <AddTodo addTodo={handleAddTodo} />
       <Filters />
+      {error && (
+        <Typography
+          variant='h6'
+          sx={{ textAlign: "center", mb: 2, color: "inherit" }}
+        >
+          {error}
+        </Typography>
+      )}
       {loading ? (
         <Typography
           variant='h6'

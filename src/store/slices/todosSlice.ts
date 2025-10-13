@@ -36,7 +36,22 @@ const initialState: TodosState = {
   sortOrder: "newest",
 };
 
-export const fetchTodos = createAsyncThunk(
+export const fetchTodos = createAsyncThunk<
+  {
+    data: ITodoItem[];
+    total: number;
+    totalPages: number;
+    page: number;
+    limit: number;
+  },
+  {
+    page?: number;
+    limit?: number;
+    filter?: "all" | "completed" | "active";
+    sortOrder?: "newest" | "oldest";
+  }, // Argument type
+  { rejectValue: string } // Reject type
+>(
   "todos/fetchTodos",
   async ({
     page = 1,
@@ -49,44 +64,47 @@ export const fetchTodos = createAsyncThunk(
     filter?: "all" | "completed" | "active";
     sortOrder?: "newest" | "oldest";
   }) => {
-
     const response = await todosApi.getTodos(page, limit, filter, sortOrder);
 
     return response.data;
   }
 );
 
-export const addTodo = createAsyncThunk(
-  "todos/addTodo",
-  async (text: string) => {
-    const response = await todosApi.addTodo(text);
-    return response.data;
-  }
-);
+export const addTodo = createAsyncThunk<
+  ITodoItem,
+  string,
+  { rejectValue: string }
+>("todos/addTodo", async (text: string) => {
+  const response = await todosApi.addTodo(text);
+  return response.data;
+});
 
-export const toggleTodo = createAsyncThunk(
-  "todos/toggleTodo",
-  async (id: number) => {
-    await todosApi.editTodoCompleted(id);
-    return id;
-  }
-);
+export const toggleTodo = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: string }
+>("todos/toggleTodo", async (id: number) => {
+  await todosApi.editTodoCompleted(id);
+  return id;
+});
 
-export const deleteTodo = createAsyncThunk(
-  "todos/deleteTodo",
-  async (id: number) => {
-    await todosApi.deleteTodo(id);
-    return id;
-  }
-);
+export const deleteTodo = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: string }
+>("todos/deleteTodo", async (id: number) => {
+  await todosApi.deleteTodo(id);
+  return id;
+});
 
-export const editTodo = createAsyncThunk(
-  "todos/editTodo",
-  async ({ id, text }: { id: number; text: string }) => {
-    await todosApi.editTodo(id, text);
-    return { id, text };
-  }
-);
+export const editTodo = createAsyncThunk<
+  { id: number; text: string },
+  { id: number; text: string },
+  { rejectValue: string }
+>("todos/editTodo", async ({ id, text }: { id: number; text: string }) => {
+  await todosApi.editTodo(id, text);
+  return { id, text };
+});
 
 const todosSlice = createSlice({
   name: "todos",

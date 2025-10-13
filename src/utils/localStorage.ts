@@ -29,7 +29,6 @@ export const loadThemeToStorage = (key: string): "light" | "dark" => {
     const saveTheme = localStorage.getItem(key);
     if (saveTheme) {
       const parsed = JSON.parse(saveTheme);
-      console.log(parsed)
       return parsed;
     }
   } catch (error) {
