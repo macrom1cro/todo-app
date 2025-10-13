@@ -5,7 +5,7 @@ import EditTodo from "../EditTodo/EditTodo";
 import Box from "@mui/material/Box";
 
 export interface ITodoListProps {
-  items: ITodoItem[];
+  todos: ITodoItem[];
   todoIdForEdit: number | null;
   onToggleTodo?: (id: number) => void;
   deleteTodo?: (id: number) => void;
@@ -14,7 +14,7 @@ export interface ITodoListProps {
 }
 
 export default function TodoList({
-  items,
+  todos,
   todoIdForEdit,
   onToggleTodo,
   deleteTodo,
@@ -23,7 +23,7 @@ export default function TodoList({
 }: ITodoListProps) {
   const todoForEdit =
     todoIdForEdit !== null
-      ? items.find(todo => todo.id === todoIdForEdit)
+      ? todos.find(todo => todo.id === todoIdForEdit)
       : undefined;
   return (
     <Box sx={{ mb: 4 }}>
@@ -35,7 +35,7 @@ export default function TodoList({
         />
       )}
       <Grid container direction='column'>
-        {items.map(todo => (
+        {todos.map(todo => (
           <Grid key={todo.id} sx={{ width: "100%" }}>
             <TodoItem
               {...todo}

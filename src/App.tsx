@@ -183,7 +183,7 @@ const AppContent = () => {
         </Typography>
       ) : (
         <TodoList
-          items={todos}
+          todos={todos}
           onToggleTodo={handleToggleTodo}
           deleteTodo={handleDeleteTodo}
           selectTodoIdForEdit={selectTodoIdForEdit}

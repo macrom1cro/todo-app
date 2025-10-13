@@ -6,7 +6,12 @@ import {
 } from "@reduxjs/toolkit";
 import type { ITodoItem } from "../../components/TodoItem/TodoItem";
 import { todosApi } from "../../api/todosApi";
+import {
+  loadTodosFromStorage,
+  saveTodosToStorage,
+} from "../../utils/localStorage";
 
+const TODOS_STORAGE_KEY = "todo-app-tasks";
 interface TodosState {
   todos: ITodoItem[];
   loading: boolean;
@@ -19,8 +24,10 @@ interface TodosState {
   sortOrder: "newest" | "oldest";
 }
 
+const initialTodos = loadTodosFromStorage(TODOS_STORAGE_KEY);
+
 const initialState: TodosState = {
-  todos: [],
+  todos: initialTodos,
   loading: false,
   error: null,
   total: 0,
@@ -77,7 +84,7 @@ export const editTodo = createAsyncThunk(
   "todos/editTodo",
   async ({ id, text }: { id: number; text: string }) => {
     await todosApi.editTodo(id, text);
-    return { id, text};
+    return { id, text };
   }
 );
 
@@ -105,6 +112,15 @@ const todosSlice = createSlice({
     clearError: state => {
       state.error = null;
     },
+    saveToLocalStorage: state => {
+      saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+    },
+    loadFromLocalStorage: state => {
+      const storedItems = loadTodosFromStorage(TODOS_STORAGE_KEY);
+      state.todos = storedItems;
+      state.total = storedItems.length;
+      state.totalPages = Math.ceil(storedItems.length / state.limit);
+    },
   },
   extraReducers: builder => {
     builder
@@ -118,34 +134,52 @@ const todosSlice = createSlice({
         state.total = action.payload.total;
         state.totalPages = action.payload.totalPages;
         state.limit = action.payload.limit;
+        saveTodosToStorage(action.payload.data, TODOS_STORAGE_KEY);
       })
       .addCase(fetchTodos.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch todos";
+        const storedItems = loadTodosFromStorage(TODOS_STORAGE_KEY);
+        if (storedItems.length > 0) {
+          state.todos = storedItems;
+          state.total = storedItems.length;
+          state.totalPages = Math.ceil(storedItems.length / state.limit);
+        }
       })
       .addCase(addTodo.fulfilled, (state, action) => {
         state.todos.push(action.payload);
         state.total += 1;
+        saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
       })
       .addCase(toggleTodo.fulfilled, (state, action) => {
         const todo = state.todos.find(item => item.id === action.payload);
         if (todo) {
           todo.completed = !todo.completed;
+          saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
         }
       })
       .addCase(deleteTodo.fulfilled, (state, action) => {
         state.todos = state.todos.filter(item => item.id !== action.payload);
         state.total -= 1;
+        saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
       })
       .addCase(editTodo.fulfilled, (state, action) => {
         const todo = state.todos.find(item => item.id === action.payload.id);
         if (todo) {
           todo.text = action.payload.text;
+          saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
         }
       });
   },
 });
 
-export const { setPage, setLimit, setFilter, setSortOrder, clearError } =
-  todosSlice.actions;
+export const {
+  setPage,
+  setLimit,
+  setFilter,
+  setSortOrder,
+  clearError,
+  saveToLocalStorage,
+  loadFromLocalStorage,
+} = todosSlice.actions;
 export default todosSlice.reducer;
