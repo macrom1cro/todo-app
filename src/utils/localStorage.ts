@@ -45,14 +45,3 @@ export const saveThemeToStorage = (theme: "light" | "dark", key: string) => {
     console.error("Error save todos to localStorage:", error);
   }
 };
-
-// useEffect(() => {
-//   const savedTheme: "light" | "dark" = localStorage.getItem("theme");
-//   if (savedTheme) {
-//     setTheme(savedTheme);
-//   }
-// }, []);
-
-// useEffect(() => {
-//   localStorage.setItem("theme", theme);
-// }, [theme]);

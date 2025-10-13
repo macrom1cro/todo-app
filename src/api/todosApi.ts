@@ -11,39 +11,8 @@ export const todosApi = {
       `/todos?page=${page}&limit=${limit}&filter=${filter}&sorting=${sorting}`
     ),
   addTodo: (text: string) => api.post(`/todos`, { text }),
-  editTodo: (id: number, text: string, completed: boolean) =>
-    api.post(`/todos/${id}`, { text, completed }),
+  editTodo: (id: number, text: string) =>
+    api.put(`/todos/${id}`, { text}),
   editTodoCompleted: (id: number) => api.patch(`/todos/${id}/toggle`),
   deleteTodo: (id: number) => api.delete(`/todos/${id}`),
 };
-
-// export const getTodos = async (
-//   page: number,
-//   limit: number,
-//   filter: "active" | "completed" | "all"
-// ) => {
-//   const response = await axios.get(
-//     `${API_URL}/todos?page=${page}&limit=${limit}&filter=${filter}`
-//   );
-//   return response.data;
-// };
-
-// export const addTodo = async (text: string) => {
-//   await axios.post(`${API_URL}/todos`, { text });
-// };
-
-// export const editTodo = async (
-//   id: number,
-//   text: string,
-//   completed: boolean
-// ) => {
-//   await axios.post(`${API_URL}/todos/${id}`, { text, completed });
-// };
-
-// export const editTodoCompleted = async (id: number) => {
-//   await axios.post(`${API_URL}/todos/${id}/toggle`);
-// };
-
-// export const deleteTodo = async (id: number) => {
-//   await axios.delete(`${API_URL}/todos/${id}`);
-// };

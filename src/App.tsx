@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
-import type { ITodoItem } from "./components/TodoItem/TodoItem";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
@@ -13,12 +12,22 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import type { Theme } from "./theme/themes";
-import { todosApi } from "./api/todosApi";
 import Pagination from "@mui/material/Pagination";
 import Box from "@mui/material/Box";
-import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
-
-const TODOS_STORAGE_KEY = "todo-app-tasks";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import {
+  addTodo,
+  deleteTodo,
+  editTodo,
+  fetchTodos,
+  setFilter,
+  setLimit,
+  setPage,
+  setSortOrder,
+  toggleTodo,
+} from "./store/slices/todosSlice";
 
 const AppContainer = styled.div<{ theme: Theme }>`
   background-color: ${props => props.theme.body};
@@ -29,106 +38,72 @@ const AppContainer = styled.div<{ theme: Theme }>`
 `;
 
 const AppContent = () => {
-  const [todos, setTodos] = useState<ITodoItem[]>(() =>
-    loadTodosFromStorage(TODOS_STORAGE_KEY)
-  );
+  const dispatch = useAppDispatch();
+  const {
+    todos: todos,
+    loading,
+    total: allTodos,
+    totalPages,
+    page,
+    limit,
+    filter,
+    sortOrder,
+  } = useAppSelector(state => state.todos);
+
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-
-  const [filter, setFilter] = useState<"all" | "completed" | "active">("all");
-  const [limit, setLimit] = useState(5);
-  const [totalPages, setTotalPages] = useState(0);
-  const [page, setPage] = useState(1);
-  const [allTodos, setAllTodos] = useState(0);
-
-  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
-
-  const [loading, setLoading] = useState(false);
-
-  const fetchUsers = useCallback(
-    async (
-      page: number = 1,
-      limit: number = 5,
-      filter: "all" | "completed" | "active" = "all",
-      sortOrder: "newest" | "oldest" = "newest"
-    ) => {
-      setLoading(true);
-      try {
-        const response = await todosApi.getTodos(
-          page,
-          limit,
-          filter,
-          sortOrder
-        );
-        setTodos(response.data.data);
-        setTotalPages(response.data.totalPages);
-        setAllTodos(response.data.total);
-        setLimit(response.data.limit);
-
-        saveTodosToStorage(response.data.data, TODOS_STORAGE_KEY);
-      } catch (err) {
-        console.error("Error load todos from api:", err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
 
   useEffect(() => {
-    fetchUsers(page, limit, filter, sortOrder);
-  }, [page, allTodos, limit, filter, sortOrder, fetchUsers]);
+    dispatch(fetchTodos({ page, limit, filter, sortOrder }));
+  }, [dispatch, page, limit, filter, sortOrder]);
 
-  const addTodo = async (text: string) => {
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    dispatch(setPage(value));
+  };
+
+  const handleAddTodo = async (text: string) => {
     try {
-      const response = await todosApi.addTodo(text);
-      setTodos([...todos, response.data]);
-      setAllTodos(allTodos + 1);
+      await dispatch(addTodo(text)).unwrap();
+      dispatch(fetchTodos({ page, limit, filter, sortOrder }));
     } catch (err) {
-      console.error("Error add todos on api:", err);
-    } finally {
-      setLoading(false);
+      console.error("Error adding todo:", err);
+    }
+  };
+
+  const handleToggleTodo = async (id: number) => {
+    try {
+      await dispatch(toggleTodo(id)).unwrap();
+    } catch (err) {
+      console.error("Error toggling todo:", err);
+    }
+  };
+
+  const handleDeleteTodo = async (id: number) => {
+    try {
+      await dispatch(deleteTodo(id)).unwrap();
+      if (todos.length === 1 && page > 1) {
+        dispatch(setPage(page - 1));
+      } else {
+        dispatch(fetchTodos({ page, limit, filter, sortOrder }));
+      }
+    } catch (err) {
+      console.error("Error deleting todo:", err);
+    }
+  };
+
+  const handleSaveEdit = async (id: number, newText: string) => {
+    try {
+      await dispatch(editTodo({ id, text: newText })).unwrap();
+      setTodoIdForEdit(id);
+    } catch (err) {
+      console.error("Error adding todo:", err);
     }
   };
 
   const selectTodoIdForEdit = (id: number | null) => {
     setTodoIdForEdit(id);
-  };
-
-  const handleSaveEdit = (id: number, newText: string) => {
-    setTodos(
-      todos.map(todo => (todo.id === id ? { ...todo, text: newText } : todo))
-    );
-    setTodoIdForEdit(null);
-  };
-
-  const toggleTodo = async (id: number) => {
-    try {
-      await todosApi.editTodoCompleted(id);
-      setTodos(
-        todos.map(todo =>
-          todo.id === id ? { ...todo, completed: !todo.completed } : todo
-        )
-      );
-    } catch (err) {
-      console.error("Error add todos on api:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteTodo = async (id: number) => {
-    try {
-      await todosApi.deleteTodo(id);
-      setTodos(todos.filter(todo => todo.id !== id));
-      setAllTodos(allTodos - 1);
-    } catch (err) {
-      console.error("Error add todos on api:", err);
-    } finally {
-      setLoading(false);
-    }
   };
   return (
     <AppContainer>
@@ -141,7 +116,7 @@ const AppContent = () => {
       >
         Todo List
       </Typography>
-      <AddTodo addTodo={addTodo} />
+      <AddTodo addTodo={handleAddTodo} />
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={3}
@@ -155,15 +130,15 @@ const AppContent = () => {
             All Task: {allTodos}
           </Typography>
           <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Display pages</InputLabel>
+            <InputLabel>Show on page</InputLabel>
             <Select
               value={limit}
-              onChange={e => setLimit(e.target.value as 5 | 10 | 20)}
-              label='Display pages'
+              onChange={e => dispatch(setLimit(Number(e.target.value)))}
+              label='ShowOnPage'
             >
-              <MenuItem value='5'>5</MenuItem>
-              <MenuItem value='10'>10</MenuItem>
-              <MenuItem value='20'>20</MenuItem>
+              <MenuItem value={5}>5</MenuItem>
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={20}>20</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -173,7 +148,7 @@ const AppContent = () => {
             <Select
               value={sortOrder}
               onChange={e =>
-                setSortOrder(e.target.value as "newest" | "oldest")
+                dispatch(setSortOrder(e.target.value as "newest" | "oldest"))
               }
               label='Sorting'
             >
@@ -186,7 +161,9 @@ const AppContent = () => {
             <Select
               value={filter}
               onChange={e =>
-                setFilter(e.target.value as "all" | "completed" | "active")
+                dispatch(
+                  setFilter(e.target.value as "all" | "completed" | "active")
+                )
               }
               label='Filter'
             >
@@ -207,8 +184,8 @@ const AppContent = () => {
       ) : (
         <TodoList
           items={todos}
-          onToggleTodo={toggleTodo}
-          deleteTodo={deleteTodo}
+          onToggleTodo={handleToggleTodo}
+          deleteTodo={handleDeleteTodo}
           selectTodoIdForEdit={selectTodoIdForEdit}
           todoIdForEdit={todoIdForEdit}
           onSaveEdit={handleSaveEdit}
@@ -222,7 +199,7 @@ const AppContent = () => {
           shape='rounded'
           size='large'
           page={page}
-          onChange={handleChange}
+          onChange={handlePageChange}
         />
       </Box>
     </AppContainer>
@@ -231,9 +208,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </Provider>
   );
 }
 

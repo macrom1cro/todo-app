@@ -10,7 +10,7 @@ export interface ITodoListProps {
   onToggleTodo?: (id: number) => void;
   deleteTodo?: (id: number) => void;
   selectTodoIdForEdit?: (id: number | null) => void;
-  onSaveEdit?: (id: number, newText: string) => void; 
+  onSaveEdit?: (id: number, newText: string) => void;
 }
 
 export default function TodoList({
@@ -26,7 +26,7 @@ export default function TodoList({
       ? items.find(todo => todo.id === todoIdForEdit)
       : undefined;
   return (
-    <Box sx={{ mb: 4 }}>    
+    <Box sx={{ mb: 4 }}>
       {todoForEdit && onSaveEdit && selectTodoIdForEdit && (
         <EditTodo
           todo={todoForEdit}
