@@ -14,7 +14,6 @@ import {
 const TODOS_STORAGE_KEY = "todo-app-tasks";
 interface TodosState {
   todos: ITodoItem[];
-  loading: boolean;
   error: string | null;
   total: number;
   totalPages: number;
@@ -28,7 +27,6 @@ const initialTodos = loadTodosFromStorage(TODOS_STORAGE_KEY);
 
 const initialState: TodosState = {
   todos: initialTodos,
-  loading: false,
   error: null,
   total: 0,
   totalPages: 0,
@@ -51,7 +49,9 @@ export const fetchTodos = createAsyncThunk(
     filter?: "all" | "completed" | "active";
     sortOrder?: "newest" | "oldest";
   }) => {
+
     const response = await todosApi.getTodos(page, limit, filter, sortOrder);
+
     return response.data;
   }
 );
@@ -125,11 +125,9 @@ const todosSlice = createSlice({
   extraReducers: builder => {
     builder
       .addCase(fetchTodos.pending, state => {
-        state.loading = true;
         state.error = null;
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.loading = false;
         state.todos = action.payload.data;
         state.total = action.payload.total;
         state.totalPages = action.payload.totalPages;
@@ -137,7 +135,6 @@ const todosSlice = createSlice({
         saveTodosToStorage(action.payload.data, TODOS_STORAGE_KEY);
       })
       .addCase(fetchTodos.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || "Failed to fetch todos";
         const storedItems = loadTodosFromStorage(TODOS_STORAGE_KEY);
         if (storedItems.length > 0) {
@@ -146,10 +143,16 @@ const todosSlice = createSlice({
           state.totalPages = Math.ceil(storedItems.length / state.limit);
         }
       })
+      .addCase(addTodo.pending, state => {
+        state.error = null;
+      })
       .addCase(addTodo.fulfilled, (state, action) => {
         state.todos.push(action.payload);
         state.total += 1;
         saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+      })
+      .addCase(addTodo.rejected, (state, action) => {
+        state.error = action.error.message || "Failed to add todo";
       })
       .addCase(toggleTodo.fulfilled, (state, action) => {
         const todo = state.todos.find(item => item.id === action.payload);

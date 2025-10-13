@@ -7,18 +7,18 @@ import Box from "@mui/material/Box";
 export interface ITodoListProps {
   todos: ITodoItem[];
   todoIdForEdit: number | null;
-  onToggleTodo?: (id: number) => void;
-  deleteTodo?: (id: number) => void;
-  selectTodoIdForEdit?: (id: number | null) => void;
-  onSaveEdit?: (id: number, newText: string) => void;
+  onToggleTodo: (id: number) => void;
+  onDeleteTodo: (id: number) => void;
+  onEditTodo: (id: number | null) => void;
+  onSaveEdit: (id: number, newText: string) => void;
 }
 
 export default function TodoList({
   todos,
   todoIdForEdit,
   onToggleTodo,
-  deleteTodo,
-  selectTodoIdForEdit,
+  onDeleteTodo,
+  onEditTodo,
   onSaveEdit,
 }: ITodoListProps) {
   const todoForEdit =
@@ -27,21 +27,21 @@ export default function TodoList({
       : undefined;
   return (
     <Box sx={{ mb: 4 }}>
-      {todoForEdit && onSaveEdit && selectTodoIdForEdit && (
+      {todoForEdit && onSaveEdit && onEditTodo && (
         <EditTodo
           todo={todoForEdit}
           onSaveEdit={onSaveEdit}
-          onCancel={() => selectTodoIdForEdit(null)}
+          onCancel={() => onEditTodo(null)}
         />
       )}
       <Grid container direction='column'>
         {todos.map(todo => (
           <Grid key={todo.id} sx={{ width: "100%" }}>
             <TodoItem
-              {...todo}
+              todo={todo}
               onToggleTodo={onToggleTodo}
-              deleteTodo={deleteTodo}
-              selectTodoIdForEdit={selectTodoIdForEdit}
+              onDeleteTodo={onDeleteTodo}
+              onEditTodo={onEditTodo}
             />
           </Grid>
         ))}

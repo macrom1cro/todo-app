@@ -25,20 +25,22 @@ export interface ITodoItem {
   text: string;
   completed: boolean;
   createdAt: Date;
-  onToggleTodo?: (id: number) => void;
-  deleteTodo?: (id: number) => void;
-  selectTodoIdForEdit?: (id: number) => void;
+}
+
+export interface TodoItemProps {
+  todo: ITodoItem;
+  onToggleTodo: (id: number) => void;
+  onDeleteTodo: (id: number) => void;
+  onEditTodo: (id: number) => void;
 }
 
 export default function TodoItem({
-  id,
-  text,
-  completed,
-  createdAt,
+  todo,
   onToggleTodo,
-  deleteTodo,
-  selectTodoIdForEdit,
-}: ITodoItem) {
+  onDeleteTodo,
+  onEditTodo,
+}: TodoItemProps) {
+  const { id, text, completed, createdAt } = todo;
   return (
     <StyledPaper elevation={2} sx={{ p: 1 }}>
       <Box sx={{ width: "100%", mb: 2 }}>
@@ -83,7 +85,7 @@ export default function TodoItem({
                 variant='outlined'
                 color='primary'
                 onClick={() => {
-                  selectTodoIdForEdit?.(id);
+                  onEditTodo?.(id);
                 }}
               >
                 Edit
@@ -92,7 +94,7 @@ export default function TodoItem({
                 variant='outlined'
                 color='error'
                 onClick={() => {
-                  deleteTodo?.(id);
+                  onDeleteTodo?.(id);
                 }}
               >
                 Delete <DeleteForeverIcon />

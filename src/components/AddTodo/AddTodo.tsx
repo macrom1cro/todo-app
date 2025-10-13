@@ -10,6 +10,7 @@ export interface AddTodoProps {
 const AddTodo = ({ addTodo }: AddTodoProps) => {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
@@ -27,16 +28,31 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
       onClick();
     }
   };
+  const validateTodo = (text: string): string | null => {
+    if (!text.trim()) return "The field cannot be empty";
+    if (text.length > 100) return "Task is too long (max 100 characters)";
+    return null;
+  };
 
-  const onClick = () => {
-    if (text.trim() === "") {
-      setError("The field cannot be empty");
+  const onClick = async () => {
+    const validationError = validateTodo(text);
+    if (validationError) {
+      setError(validationError);
       return;
     }
-
-    addTodo(text);
-    setText("");
-    setError("");
+    setIsAdding(true);
+    try {
+      await addTodo(text);
+      setText("");
+      setError("");
+    } catch (error) {
+      console.error(error);
+      setError("Failed to add task");
+    } finally {
+      setTimeout(() => {
+        setIsAdding(false);
+      }, 500);
+    }
   };
   return (
     <Grid
@@ -65,8 +81,13 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 4, md: 1 }}>
-        <Button variant='outlined' color='success' onClick={onClick}>
-          Add
+        <Button
+          variant='outlined'
+          color='success'
+          onClick={onClick}
+          disabled={isAdding}
+        >
+          {isAdding ? "Adding..." : "Add"}
         </Button>
       </Grid>
     </Grid>

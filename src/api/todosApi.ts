@@ -7,9 +7,9 @@ export const todosApi = {
     filter: "active" | "completed" | "all" = "all",
     sorting: "newest" | "oldest" = "newest"
   ) =>
-    api.get(
-      `/todos?page=${page}&limit=${limit}&filter=${filter}&sorting=${sorting}`
-    ),
+    api.get("/todos", {
+      params: { page, limit, filter, sorting }
+    }),
   addTodo: (text: string) => api.post(`/todos`, { text }),
   editTodo: (id: number, text: string) =>
     api.put(`/todos/${id}`, { text}),
