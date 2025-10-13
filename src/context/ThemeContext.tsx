@@ -6,7 +6,9 @@ import {
 } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { lightTheme, darkTheme } from "../theme/themes";
+import { loadThemeToStorage, saveThemeToStorage } from "../utils/localStorage";
 
+const THEME_CONTEXT_KEY = "todo-app-theme";
 interface ThemeContextType {
   theme: "light" | "dark";
   toggleTheme: () => void;
@@ -21,14 +23,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark";
+    const savedTheme = loadThemeToStorage(THEME_CONTEXT_KEY);
     if (savedTheme) {
       setTheme(savedTheme);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("theme", theme);
+    saveThemeToStorage(theme, THEME_CONTEXT_KEY);
   }, [theme]);
 
   const toggleTheme = () => {

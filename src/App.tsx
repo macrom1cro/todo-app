@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
 import type { ITodoItem } from "./components/TodoItem/TodoItem";
 import Typography from "@mui/material/Typography";
-// import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
 import Stack from "@mui/material/Stack";
@@ -15,8 +14,11 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import type { Theme } from "./theme/themes";
 import { todosApi } from "./api/todosApi";
+import Pagination from "@mui/material/Pagination";
+import Box from "@mui/material/Box";
+import { loadTodosFromStorage, saveTodosToStorage } from "./utils/localStorage";
 
-// const TODOS_STORAGE_KEY = "todo-app-tasks";
+const TODOS_STORAGE_KEY = "todo-app-tasks";
 
 const AppContainer = styled.div<{ theme: Theme }>`
   background-color: ${props => props.theme.body};
@@ -27,58 +29,67 @@ const AppContainer = styled.div<{ theme: Theme }>`
 `;
 
 const AppContent = () => {
-  const [todos, setTodos] = useState<ITodoItem[]>(
-    []
-    // () => loadTodosFromStorage(TODOS_STORAGE_KEY)
+  const [todos, setTodos] = useState<ITodoItem[]>(() =>
+    loadTodosFromStorage(TODOS_STORAGE_KEY)
   );
-  //   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState(null);
-  const fetchUsers = async () => {
-    // setLoading(true);
-    // setError(null);
-    try {
-      const response = await todosApi.getTodos();
-      setTodos(response.data.data);
-    } catch (err) {
-      console.error("Error load todos from api:", err);
-      // setError(err.message);
-    } finally {
-      // setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [filter, setFilter] = useState<"all" | "completed" | "active">("all");
 
-  // useEffect(() => {
-  //   saveTodosToStorage(todos, TODOS_STORAGE_KEY);
-  // }, [todos]);
+  const [filter, setFilter] = useState<"all" | "completed" | "active">("all");
+  const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useState(1);
+  const [allTodos, setAllTodos] = useState(0);
+
+  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  const [loading, setLoading] = useState(false);
+
+  const fetchUsers = useCallback(
+    async (
+      page: number = 1,
+      limit: number = 5,
+      filter: "all" | "completed" | "active" = "all",
+      sortOrder: "newest" | "oldest" = "newest"
+    ) => {
+      setLoading(true);
+      try {
+        const response = await todosApi.getTodos(
+          page,
+          limit,
+          filter,
+          sortOrder
+        );
+        setTodos(response.data.data);
+        setTotalPages(response.data.totalPages);
+        setAllTodos(response.data.total);
+        setLimit(response.data.limit);
+
+        saveTodosToStorage(response.data.data, TODOS_STORAGE_KEY);
+      } catch (err) {
+        console.error("Error load todos from api:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    fetchUsers(page, limit, filter, sortOrder);
+  }, [page, allTodos, limit, filter, sortOrder, fetchUsers]);
+
   const addTodo = async (text: string) => {
     try {
       const response = await todosApi.addTodo(text);
       setTodos([...todos, response.data]);
-      // setTodos(response.data.data);
+      setAllTodos(allTodos + 1);
     } catch (err) {
       console.error("Error add todos on api:", err);
-      // setError(err.message);
     } finally {
-      // setLoading(false);
-    }
-  };
-
-  const deleteTodo = async (id: number) => {
-    try {
-      await todosApi.deleteTodo(id);
-      setTodos(todos.filter(todo => todo.id !== id));
-    } catch (err) {
-      console.error("Error add todos on api:", err);
-      // setError(err.message);
-    } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -93,26 +104,6 @@ const AppContent = () => {
     setTodoIdForEdit(null);
   };
 
-  const getSortedAndFilteredTodos = () => {
-    let filteredTodos = todos;
-
-    if (filter === "completed") {
-      filteredTodos = todos.filter(todo => todo.completed);
-    } else if (filter === "active") {
-      filteredTodos = todos.filter(todo => !todo.completed);
-    }
-    const sortedTodos = [...filteredTodos].sort((a, b) => {
-      const createDateA = new Date(a.createdAt).getTime();
-      const createDateB = new Date(b.createdAt).getTime();
-      if (sortOrder === "newest") {
-        return createDateB - createDateA;
-      } else {
-        return createDateA - createDateB;
-      }
-    });
-
-    return sortedTodos;
-  };
   const toggleTodo = async (id: number) => {
     try {
       await todosApi.editTodoCompleted(id);
@@ -121,12 +112,22 @@ const AppContent = () => {
           todo.id === id ? { ...todo, completed: !todo.completed } : todo
         )
       );
-      // setTodos([...todos, response.data]);
     } catch (err) {
       console.error("Error add todos on api:", err);
-      // setError(err.message);
     } finally {
-      // setLoading(false);
+      setLoading(false);
+    }
+  };
+
+  const deleteTodo = async (id: number) => {
+    try {
+      await todosApi.deleteTodo(id);
+      setTodos(todos.filter(todo => todo.id !== id));
+      setAllTodos(allTodos - 1);
+    } catch (err) {
+      console.error("Error add todos on api:", err);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -140,20 +141,32 @@ const AppContent = () => {
       >
         Todo List
       </Typography>
-
       <AddTodo addTodo={addTodo} />
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={3}
         sx={{ mb: 3, justifyContent: "space-between", alignItems: "center" }}
       >
-        {" "}
-        <Typography
-          variant='h6'
-          sx={{ textAlign: "center", mb: 2, color: "inherit" }}
-        >
-          All Task: {todos.length}
-        </Typography>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+          <Typography
+            variant='h6'
+            sx={{ textAlign: "center", mb: 2, color: "inherit" }}
+          >
+            All Task: {allTodos}
+          </Typography>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Display pages</InputLabel>
+            <Select
+              value={limit}
+              onChange={e => setLimit(e.target.value as 5 | 10 | 20)}
+              label='Display pages'
+            >
+              <MenuItem value='5'>5</MenuItem>
+              <MenuItem value='10'>10</MenuItem>
+              <MenuItem value='20'>20</MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Sorting</InputLabel>
@@ -184,15 +197,34 @@ const AppContent = () => {
           </FormControl>
         </Stack>
       </Stack>
-
-      <TodoList
-        items={getSortedAndFilteredTodos()}
-        onToggleTodo={toggleTodo}
-        deleteTodo={deleteTodo}
-        selectTodoIdForEdit={selectTodoIdForEdit}
-        todoIdForEdit={todoIdForEdit}
-        onSaveEdit={handleSaveEdit}
-      />
+      {loading ? (
+        <Typography
+          variant='h6'
+          sx={{ textAlign: "center", mb: 2, color: "inherit" }}
+        >
+          loading...
+        </Typography>
+      ) : (
+        <TodoList
+          items={todos}
+          onToggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+          selectTodoIdForEdit={selectTodoIdForEdit}
+          todoIdForEdit={todoIdForEdit}
+          onSaveEdit={handleSaveEdit}
+        />
+      )}
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Pagination
+          count={totalPages}
+          color='primary'
+          variant='outlined'
+          shape='rounded'
+          size='large'
+          page={page}
+          onChange={handleChange}
+        />
+      </Box>
     </AppContainer>
   );
 };

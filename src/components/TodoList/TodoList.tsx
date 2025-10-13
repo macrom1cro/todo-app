@@ -10,7 +10,7 @@ export interface ITodoListProps {
   onToggleTodo?: (id: number) => void;
   deleteTodo?: (id: number) => void;
   selectTodoIdForEdit?: (id: number | null) => void;
-  onSaveEdit?: (id: number, newText: string) => void;
+  onSaveEdit?: (id: number, newText: string) => void; 
 }
 
 export default function TodoList({

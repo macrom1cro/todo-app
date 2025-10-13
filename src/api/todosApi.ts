@@ -3,9 +3,13 @@ import api from "./api";
 export const todosApi = {
   getTodos: (
     page: number = 1,
-    limit: number = 100,
-    filter: "active" | "completed" | "all" = "all"
-  ) => api.get(`/todos?page=${page}&limit=${limit}&filter=${filter}`),
+    limit: number = 5,
+    filter: "active" | "completed" | "all" = "all",
+    sorting: "newest" | "oldest" = "newest"
+  ) =>
+    api.get(
+      `/todos?page=${page}&limit=${limit}&filter=${filter}&sorting=${sorting}`
+    ),
   addTodo: (text: string) => api.post(`/todos`, { text }),
   editTodo: (id: number, text: string, completed: boolean) =>
     api.post(`/todos/${id}`, { text, completed }),
