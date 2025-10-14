@@ -49,8 +49,8 @@ export const fetchTodos = createAsyncThunk<
     limit?: number;
     filter?: "all" | "completed" | "active";
     sortOrder?: "newest" | "oldest";
-  }, // Argument type
-  { rejectValue: string } // Reject type
+  },
+  { rejectValue: string }
 >(
   "todos/fetchTodos",
   async ({
