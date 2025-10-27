@@ -10,6 +10,7 @@ import {
   loadTodosFromStorage,
   saveTodosToStorage,
 } from "../../utils/localStorage";
+import { FilterStatus, SortingStatus } from "../../components/Filters/Filters";
 
 const TODOS_STORAGE_KEY = "todo-app-tasks";
 interface TodosState {
@@ -19,8 +20,8 @@ interface TodosState {
   totalPages: number;
   page: number;
   limit: number;
-  filter: "all" | "completed" | "active";
-  sortOrder: "newest" | "oldest";
+  filter: FilterStatus;
+  sortOrder: SortingStatus;
 }
 
 const initialTodos = loadTodosFromStorage(TODOS_STORAGE_KEY);
@@ -32,8 +33,8 @@ const initialState: TodosState = {
   totalPages: 0,
   page: 1,
   limit: 5,
-  filter: "all",
-  sortOrder: "newest",
+  filter: FilterStatus.ALL,
+  sortOrder: SortingStatus.NEWEST,
 };
 
 export const fetchTodos = createAsyncThunk<
@@ -47,8 +48,8 @@ export const fetchTodos = createAsyncThunk<
   {
     page?: number;
     limit?: number;
-    filter?: "all" | "completed" | "active";
-    sortOrder?: "newest" | "oldest";
+    filter?: FilterStatus;
+    sortOrder?: SortingStatus;
   },
   { rejectValue: string }
 >(
@@ -57,12 +58,12 @@ export const fetchTodos = createAsyncThunk<
     page = 1,
     limit = 5,
     filter = "all",
-    sortOrder = "newest",
+    sortOrder = SortingStatus.NEWEST,
   }: {
     page?: number;
     limit?: number;
-    filter?: "all" | "completed" | "active";
-    sortOrder?: "newest" | "oldest";
+    filter?: FilterStatus;
+    sortOrder?: SortingStatus;
   }) => {
     const response = await todosApi.getTodos(page, limit, filter, sortOrder);
 
@@ -118,12 +119,12 @@ const todosSlice = createSlice({
     },
     setFilter: (
       state,
-      action: PayloadAction<"all" | "completed" | "active">
+      action: PayloadAction<FilterStatus>
     ) => {
       state.filter = action.payload;
       state.page = 1;
     },
-    setSortOrder: (state, action: PayloadAction<"newest" | "oldest">) => {
+    setSortOrder: (state, action: PayloadAction<SortingStatus>) => {
       state.sortOrder = action.payload;
       state.page = 1;
     },
