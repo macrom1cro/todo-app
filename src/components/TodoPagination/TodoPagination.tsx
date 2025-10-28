@@ -1,0 +1,28 @@
+import Box from "@mui/material/Box";
+import Pagination from "@mui/material/Pagination";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setPage } from "../../store/slices/todosSlice";
+
+export default function TodoPagination() {
+  const dispatch = useAppDispatch();
+  const { totalPages, page } = useAppSelector(state => state.todos);
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    dispatch(setPage(value));
+  };
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <Pagination
+        count={totalPages}
+        color='primary'
+        variant='outlined'
+        shape='rounded'
+        size='large'
+        page={page}
+        onChange={handlePageChange}
+      />
+    </Box>
+  );
+}

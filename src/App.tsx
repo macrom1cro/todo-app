@@ -3,17 +3,13 @@ import styled from "styled-components";
 import TodoList from "./components/TodoList/TodoList";
 import Time from "./components/Time/Time";
 import AddTodo from "./components/AddTodo/AddTodo";
-import Typography from "@mui/material/Typography";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
 import type { Theme } from "./theme/themes";
-import Pagination from "@mui/material/Pagination";
-import Box from "@mui/material/Box";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import {
-  addTodo,
   deleteTodo,
   editTodo,
   fetchTodos,
@@ -21,6 +17,8 @@ import {
   toggleTodo,
 } from "./store/slices/todosSlice";
 import Filters from "./components/Filters/Filters";
+import TodoPagination from "./components/TodoPagination/TodoPagination";
+import Text from "./components/Text/Text";
 
 const AppContainer = styled.div<{ theme: Theme }>`
   background-color: ${props => props.theme.body};
@@ -34,7 +32,7 @@ const AppContent = () => {
   const dispatch = useAppDispatch();
   const {
     todos: todos,
-    totalPages,
+    // totalPages,
     page,
     limit,
     filter,
@@ -58,24 +56,6 @@ const AppContent = () => {
       }, 300);
     }
   }, [dispatch, page, limit, filter, sortOrder]);
-
-  const handlePageChange = (
-    _event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
-    dispatch(setPage(value));
-  };
-
-  const handleAddTodo = async (text: string) => {
-    setError("");
-    try {
-      await dispatch(addTodo(text)).unwrap();
-      dispatch(fetchTodos({ page, limit, filter, sortOrder }));
-    } catch (err) {
-      setError("No connection to the server");
-      console.error("Error adding todo:", err);
-    }
-  };
 
   const handleToggleTodo = async (id: number) => {
     try {
@@ -114,30 +94,12 @@ const AppContent = () => {
     <AppContainer>
       <ThemeToggle />
       <Time />
-      <Typography
-        variant='h1'
-        component='h1'
-        sx={{ textAlign: "center", mb: 4, color: "inherit" }}
-      >
-        Todo List
-      </Typography>
-      <AddTodo addTodo={handleAddTodo} />
+      <Text variant='h1' mb={4} text='Todo List' />
+      <AddTodo />
       <Filters />
-      {error && (
-        <Typography
-          variant='h6'
-          sx={{ textAlign: "center", mb: 2, color: "inherit" }}
-        >
-          {error}
-        </Typography>
-      )}
+      {error && <Text variant='h6' mb={2} text={error} />}
       {loading ? (
-        <Typography
-          variant='h6'
-          sx={{ textAlign: "center", mb: 2, color: "inherit" }}
-        >
-          loading...
-        </Typography>
+        <Text variant='h6' mb={2} text='loading...' />
       ) : (
         <TodoList
           todos={todos}
@@ -148,17 +110,7 @@ const AppContent = () => {
           onSaveEdit={handleSaveEdit}
         />
       )}
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Pagination
-          count={totalPages}
-          color='primary'
-          variant='outlined'
-          shape='rounded'
-          size='large'
-          page={page}
-          onChange={handlePageChange}
-        />
-      </Box>
+      <TodoPagination />
     </AppContainer>
   );
 };

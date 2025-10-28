@@ -2,15 +2,21 @@ import { useState, type ChangeEvent, type KeyboardEvent } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { addTodo, fetchTodos } from "../../store/slices/todosSlice";
 
-export interface AddTodoProps {
-  addTodo: (text: string) => void;
-}
-
-const AddTodo = ({ addTodo }: AddTodoProps) => {
+const AddTodo = () => {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const {
+    page,
+    limit,
+    filter,
+    sortOrder,
+  } = useAppSelector(state => state.todos);
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
@@ -34,6 +40,17 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
     return null;
   };
 
+  const handleAddTodo = async (text: string) => {
+    setError("");
+    try {
+      await dispatch(addTodo(text)).unwrap();
+      dispatch(fetchTodos({ page, limit, filter, sortOrder }));
+    } catch (err) {
+      setError("No connection to the server");
+      console.error("Error adding todo:", err);
+    }
+  };
+
   const onClick = async () => {
     const validationError = validateTodo(text);
     if (validationError) {
@@ -42,7 +59,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
     }
     setIsAdding(true);
     try {
-      await addTodo(text);
+      await handleAddTodo(text);
       setText("");
       setError("");
     } catch (error) {
@@ -54,6 +71,7 @@ const AddTodo = ({ addTodo }: AddTodoProps) => {
       }, 500);
     }
   };
+
   return (
     <Grid
       container
