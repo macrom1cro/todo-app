@@ -1,15 +1,23 @@
-import styled from "styled-components";
-import TodoList from "./components/TodoList/TodoList";
-import Time from "./components/Time/Time";
-import AddTodo from "./components/AddTodo/AddTodo";
+import { useEffect, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useAppDispatch } from "./store/hooks";
+import { initializeAuth } from "./store/slices/authSlice";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import HomePage from "./pages/HomePage/HomePage";
+import LoginForm from "./pages/LoginForm/LoginForm";
+import RegisterForm from "./pages/RegisterForm/RegisterForm";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
+import styled from "styled-components";
 import type { Theme } from "./theme/themes";
-import { Provider } from "react-redux";
-import { store } from "./store/store";
-import Filters from "./components/Filters/Filters";
-import TodoPagination from "./components/TodoPagination/TodoPagination";
-import Text from "./components/Text/Text";
+import { Box, CircularProgress } from "@mui/material";
 
 const AppContainer = styled.div<{ theme: Theme }>`
   background-color: ${props => props.theme.body};
@@ -20,20 +28,82 @@ const AppContainer = styled.div<{ theme: Theme }>`
 `;
 
 function App() {
-  return (
-    <Provider store={store}>
+  const dispatch = useAppDispatch();
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        await dispatch(initializeAuth()).unwrap();
+      } catch (error) {
+        console.error("Failed to initialize app:", error);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    initializeApp();
+  }, [dispatch]);
+
+  if (!isInitialized) {
+    return (
       <ThemeProvider>
+        <Box
+          display='flex'
+          justifyContent='center'
+          alignItems='center'
+          minHeight='100vh'
+        >
+          <CircularProgress size={60} />
+        </Box>
+      </ThemeProvider>
+    );
+  }
+  return (
+    <ThemeProvider>
+      <Router>
         <AppContainer>
           <ThemeToggle />
-          <Time />
-          <Text variant='h1' mb={4} text='Todo List' />
-          <AddTodo />
-          <Filters />
-          <TodoList />
-          <TodoPagination />
+          <Routes>
+            <Route
+              path='/login'
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <LoginForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/register'
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <RegisterForm />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path='/'
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/profile'
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path='/404' element={<NotFoundPage />} />
+            <Route path='*' element={<Navigate to='/404' replace />} />
+          </Routes>
         </AppContainer>
-      </ThemeProvider>
-    </Provider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

@@ -26,7 +26,7 @@ export const SortingStatus = {
 
 export type SortingStatus = (typeof SortingStatus)[keyof typeof SortingStatus];
 
-export default function Filters() {
+function Filters() {
   const dispatch = useAppDispatch();
   const {
     limit,
@@ -34,6 +34,7 @@ export default function Filters() {
     filter,
     total: allTodos,
   } = useAppSelector(state => state.todos);
+
 
   return (
     <Stack
@@ -91,3 +92,5 @@ export default function Filters() {
     </Stack>
   );
 }
+
+export default Filters;

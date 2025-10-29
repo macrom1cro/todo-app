@@ -147,11 +147,8 @@ const todosSlice = createSlice({
     },
     setLimit: (state, { payload }: PayloadAction<number>) => {
       state.limit = payload;
+      resetPagination(state);
       calculatePagination(state);
-      const maxPage = Math.max(1, state.totalPages);
-      if (state.page > maxPage) {
-        state.page = maxPage;
-      }
     },
     setFilter: (state, { payload }: PayloadAction<FilterStatus>) => {
       state.filter = payload;
@@ -183,10 +180,8 @@ const todosSlice = createSlice({
         state.todos = payload.data;
         state.total = payload.total;
         state.totalPages = payload.totalPages;
+        state.page = payload.page;
         state.limit = payload.limit;
-        if (state.page > state.totalPages) {
-          state.page = state.totalPages;
-        }
         updateStorage(state);
       })
       .addCase(fetchTodos.rejected, (state, { error }) => {
@@ -206,6 +201,7 @@ const todosSlice = createSlice({
         state.todos.push(payload);
         state.total += 1;
         calculatePagination(state);
+        resetPagination(state);
         updateStorage(state);
       })
       .addCase(addTodo.rejected, (state, { error }) => {
@@ -222,6 +218,9 @@ const todosSlice = createSlice({
         state.todos = state.todos.filter(item => item.id !== id);
         state.total -= 1;
         calculatePagination(state);
+        if (state.todos.length === 0 && state.page > 1) {
+          state.page = state.page - 1;
+        }
         updateStorage(state);
       })
       .addCase(editTodo.fulfilled, (state, { payload: { id, text } }) => {

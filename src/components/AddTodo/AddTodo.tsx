@@ -11,12 +11,9 @@ const AddTodo = () => {
   const [isAdding, setIsAdding] = useState(false);
 
   const dispatch = useAppDispatch();
-  const {
-    page,
-    limit,
-    filter,
-    sortOrder,
-  } = useAppSelector(state => state.todos);
+  const { limit, filter, sortOrder } = useAppSelector(
+    state => state.todos
+  );
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
@@ -40,17 +37,6 @@ const AddTodo = () => {
     return null;
   };
 
-  const handleAddTodo = async (text: string) => {
-    setError("");
-    try {
-      await dispatch(addTodo(text)).unwrap();
-      dispatch(fetchTodos({ page, limit, filter, sortOrder }));
-    } catch (err) {
-      setError("No connection to the server");
-      console.error("Error adding todo:", err);
-    }
-  };
-
   const onClick = async () => {
     const validationError = validateTodo(text);
     if (validationError) {
@@ -59,7 +45,8 @@ const AddTodo = () => {
     }
     setIsAdding(true);
     try {
-      await handleAddTodo(text);
+      await dispatch(addTodo(text)).unwrap();
+      dispatch(fetchTodos({ page: 1, limit, filter, sortOrder }));
       setText("");
       setError("");
     } catch (error) {
