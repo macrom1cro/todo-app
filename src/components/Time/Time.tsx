@@ -1,6 +1,7 @@
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 
 export default function Time() {
   const [nowTime, setNowTime] = useState(new Date());
@@ -17,6 +18,7 @@ export default function Time() {
       <Typography variant='h6' align='center' sx={{ color: "white" }}>
         The time is now: {nowTime.toLocaleTimeString()}
       </Typography>
+      <ThemeToggle />
     </Paper>
   );
 }

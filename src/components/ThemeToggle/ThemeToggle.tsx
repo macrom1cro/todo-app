@@ -16,7 +16,7 @@ export const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = themeContext;
 
   return (
-    <Box sx={{ position: "fixed", top: 16, right: 16, zIndex: 9999 }}>
+    <Box sx={{ position: "absolute", top: 24, right: 24 }}>
       <IconButton onClick={toggleTheme} color='inherit'>
         {theme === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
       </IconButton>

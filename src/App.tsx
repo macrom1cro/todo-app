@@ -8,7 +8,6 @@ import {
 import { useAppDispatch } from "./store/hooks";
 import { initializeAuth } from "./store/slices/authSlice";
 import { ThemeProvider } from "./context/ThemeContext";
-import { ThemeToggle } from "./components/ThemeToggle/ThemeToggle";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import HomePage from "./pages/HomePage/HomePage";
 import LoginForm from "./pages/LoginForm/LoginForm";
@@ -18,6 +17,7 @@ import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 import styled from "styled-components";
 import type { Theme } from "./theme/themes";
 import { Box, CircularProgress } from "@mui/material";
+import Time from "./components/Time/Time";
 
 const AppContainer = styled.div<{ theme: Theme }>`
   background-color: ${props => props.theme.body};
@@ -63,7 +63,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <AppContainer>
-          <ThemeToggle />
+          <Time />
           <Routes>
             <Route
               path='/login'
