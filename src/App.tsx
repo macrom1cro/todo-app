@@ -29,67 +29,7 @@ const AppContainer = styled.div<{ theme: Theme }>`
 `;
 
 const AppContent = () => {
-  const dispatch = useAppDispatch();
-  const {
-    todos: todos,
-    // totalPages,
-    page,
-    limit,
-    filter,
-    sortOrder,
-  } = useAppSelector(state => state.todos);
 
-  const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    try {
-      dispatch(fetchTodos({ page, limit, filter, sortOrder }));
-    } catch (err) {
-      console.error(err);
-      setError("No fetchTodos");
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 300);
-    }
-  }, [dispatch, page, limit, filter, sortOrder]);
-
-  const handleToggleTodo = async (id: number) => {
-    try {
-      await dispatch(toggleTodo(id)).unwrap();
-    } catch (err) {
-      console.error("Error toggling todo:", err);
-    }
-  };
-
-  const handleDeleteTodo = async (id: number) => {
-    try {
-      await dispatch(deleteTodo(id)).unwrap();
-      if (todos.length === 1 && page > 1) {
-        dispatch(setPage(page - 1));
-      } else {
-        dispatch(fetchTodos({ page, limit, filter, sortOrder }));
-      }
-    } catch (err) {
-      console.error("Error deleting todo:", err);
-    }
-  };
-
-  const handleSaveEdit = async (id: number, newText: string) => {
-    try {
-      await dispatch(editTodo({ id, text: newText })).unwrap();
-      setTodoIdForEdit(null);
-    } catch (err) {
-      console.error("Error adding todo:", err);
-    }
-  };
-
-  const selectTodoIdForEdit = (id: number | null) => {
-    setTodoIdForEdit(id);
-  };
   return (
     <AppContainer>
       <ThemeToggle />

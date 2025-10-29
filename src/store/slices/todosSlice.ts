@@ -1,8 +1,8 @@
-// store/slices/todosSlice.ts
 import {
   createSlice,
   createAsyncThunk,
   type PayloadAction,
+  type AsyncThunk,
 } from "@reduxjs/toolkit";
 import type { ITodoItem } from "../../components/TodoItem/TodoItem";
 import { todosApi } from "../../api/todosApi";
@@ -13,6 +13,28 @@ import {
 import { FilterStatus, SortingStatus } from "../../components/Filters/Filters";
 
 const TODOS_STORAGE_KEY = "todo-app-tasks";
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 5;
+
+type ThunkApiConfig = {
+  rejectValue: string;
+  state: unknown;
+};
+
+type FetchTodosResponse = {
+  data: ITodoItem[];
+  total: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+};
+
+type FetchTodosParams = {
+  page?: number;
+  limit?: number;
+  filter?: FilterStatus;
+  sortOrder?: SortingStatus;
+};
 interface TodosState {
   todos: ITodoItem[];
   error: string | null;
@@ -24,46 +46,47 @@ interface TodosState {
   sortOrder: SortingStatus;
 }
 
-const initialTodos = loadTodosFromStorage(TODOS_STORAGE_KEY);
+const initializeState = (): TodosState => {
+  const initialTodos = loadTodosFromStorage(TODOS_STORAGE_KEY);
 
-const initialState: TodosState = {
-  todos: initialTodos,
-  error: null,
-  total: 0,
-  totalPages: 0,
-  page: 1,
-  limit: 5,
-  filter: FilterStatus.ALL,
-  sortOrder: SortingStatus.NEWEST,
+  return {
+    todos: initialTodos,
+    error: null,
+    total: initialTodos.length,
+    totalPages: Math.ceil(initialTodos.length / DEFAULT_LIMIT),
+    page: DEFAULT_PAGE,
+    limit: DEFAULT_LIMIT,
+    filter: FilterStatus.ALL,
+    sortOrder: SortingStatus.NEWEST,
+  };
 };
 
-export const fetchTodos = createAsyncThunk<
-  {
-    data: ITodoItem[];
-    total: number;
-    totalPages: number;
-    page: number;
-    limit: number;
-  },
-  {
-    page?: number;
-    limit?: number;
-    filter?: FilterStatus;
-    sortOrder?: SortingStatus;
-  },
-  { rejectValue: string }
->(
+const handleThunkError = (error: unknown): string => {
+  return error instanceof Error ? error.message : "An unknown error occurred";
+};
+
+const createAppThunk = <Returned, ThunkArg = void>(
+  type: string,
+  request: (arg: ThunkArg) => Promise<Returned>
+): AsyncThunk<Returned, ThunkArg, ThunkApiConfig> =>
+  createAsyncThunk<Returned, ThunkArg, ThunkApiConfig>(
+    type,
+    async (arg, { rejectWithValue }) => {
+      try {
+        return await request(arg);
+      } catch (error) {
+        return rejectWithValue(handleThunkError(error));
+      }
+    }
+  );
+
+export const fetchTodos = createAppThunk<FetchTodosResponse, FetchTodosParams>(
   "todos/fetchTodos",
   async ({
-    page = 1,
-    limit = 5,
-    filter = "all",
+    page = DEFAULT_PAGE,
+    limit = DEFAULT_LIMIT,
+    filter = FilterStatus.ALL,
     sortOrder = SortingStatus.NEWEST,
-  }: {
-    page?: number;
-    limit?: number;
-    filter?: FilterStatus;
-    sortOrder?: SortingStatus;
   }) => {
     const response = await todosApi.getTodos(page, limit, filter, sortOrder);
 
@@ -71,74 +94,80 @@ export const fetchTodos = createAsyncThunk<
   }
 );
 
-export const addTodo = createAsyncThunk<
-  ITodoItem,
-  string,
-  { rejectValue: string }
->("todos/addTodo", async (text: string) => {
-  const response = await todosApi.addTodo(text);
-  return response.data;
-});
+export const addTodo = createAppThunk<ITodoItem, string>(
+  "todos/addTodo",
+  async (text: string) => {
+    const response = await todosApi.addTodo(text);
+    return response.data;
+  }
+);
 
-export const toggleTodo = createAsyncThunk<
-  number,
-  number,
-  { rejectValue: string }
->("todos/toggleTodo", async (id: number) => {
-  await todosApi.editTodoCompleted(id);
-  return id;
-});
+export const toggleTodo = createAppThunk<number, number>(
+  "todos/toggleTodo",
+  async (id: number) => {
+    await todosApi.editTodoCompleted(id);
+    return id;
+  }
+);
 
-export const deleteTodo = createAsyncThunk<
-  number,
-  number,
-  { rejectValue: string }
->("todos/deleteTodo", async (id: number) => {
-  await todosApi.deleteTodo(id);
-  return id;
-});
+export const deleteTodo = createAppThunk<number, number>(
+  "todos/deleteTodo",
+  async (id: number) => {
+    await todosApi.deleteTodo(id);
+    return id;
+  }
+);
 
-export const editTodo = createAsyncThunk<
+export const editTodo = createAppThunk<
   { id: number; text: string },
-  { id: number; text: string },
-  { rejectValue: string }
->("todos/editTodo", async ({ id, text }: { id: number; text: string }) => {
+  { id: number; text: string }
+>("todos/editTodo", async ({ id, text }) => {
   await todosApi.editTodo(id, text);
   return { id, text };
 });
 
+const updateStorage = (state: TodosState): void => {
+  saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+};
+
+const calculatePagination = (state: TodosState): void => {
+  state.totalPages = Math.ceil(state.total / state.limit);
+};
+
+const resetPagination = (state: TodosState): void => {
+  state.page = DEFAULT_PAGE;
+};
+
 const todosSlice = createSlice({
   name: "todos",
-  initialState,
+  initialState: initializeState(),
   reducers: {
-    setPage: (state, action: PayloadAction<number>) => {
-      state.page = action.payload;
+    setPage: (state, { payload }: PayloadAction<number>) => {
+      state.page = payload;
     },
-    setLimit: (state, action: PayloadAction<number>) => {
-      state.limit = action.payload;
+    setLimit: (state, { payload }: PayloadAction<number>) => {
+      state.limit = payload;
+      calculatePagination(state);
     },
-    setFilter: (
-      state,
-      action: PayloadAction<FilterStatus>
-    ) => {
-      state.filter = action.payload;
-      state.page = 1;
+    setFilter: (state, { payload }: PayloadAction<FilterStatus>) => {
+      state.filter = payload;
+      resetPagination(state);
     },
-    setSortOrder: (state, action: PayloadAction<SortingStatus>) => {
-      state.sortOrder = action.payload;
-      state.page = 1;
+    setSortOrder: (state, { payload }: PayloadAction<SortingStatus>) => {
+      state.sortOrder = payload;
+      resetPagination(state);
     },
     clearError: state => {
       state.error = null;
     },
     saveToLocalStorage: state => {
-      saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+      updateStorage(state);
     },
     loadFromLocalStorage: state => {
       const storedItems = loadTodosFromStorage(TODOS_STORAGE_KEY);
       state.todos = storedItems;
       state.total = storedItems.length;
-      state.totalPages = Math.ceil(storedItems.length / state.limit);
+      calculatePagination(state);
     },
   },
   extraReducers: builder => {
@@ -146,50 +175,53 @@ const todosSlice = createSlice({
       .addCase(fetchTodos.pending, state => {
         state.error = null;
       })
-      .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.todos = action.payload.data;
-        state.total = action.payload.total;
-        state.totalPages = action.payload.totalPages;
-        state.limit = action.payload.limit;
-        saveTodosToStorage(action.payload.data, TODOS_STORAGE_KEY);
+      .addCase(fetchTodos.fulfilled, (state, { payload }) => {
+        state.todos = payload.data;
+        state.total = payload.total;
+        state.totalPages = payload.totalPages;
+        state.limit = payload.limit;
+        updateStorage(state);
       })
-      .addCase(fetchTodos.rejected, (state, action) => {
-        state.error = action.error.message || "Failed to fetch todos";
+      .addCase(fetchTodos.rejected, (state, { error }) => {
+        state.error = error.message ?? "Failed to fetch todos";
         const storedItems = loadTodosFromStorage(TODOS_STORAGE_KEY);
+
         if (storedItems.length > 0) {
           state.todos = storedItems;
           state.total = storedItems.length;
-          state.totalPages = Math.ceil(storedItems.length / state.limit);
+          calculatePagination(state);
         }
       })
       .addCase(addTodo.pending, state => {
         state.error = null;
       })
-      .addCase(addTodo.fulfilled, (state, action) => {
-        state.todos.push(action.payload);
+      .addCase(addTodo.fulfilled, (state, { payload }) => {
+        state.todos.push(payload);
         state.total += 1;
-        saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+        calculatePagination(state);
+        updateStorage(state);
       })
-      .addCase(addTodo.rejected, (state, action) => {
-        state.error = action.error.message || "Failed to add todo";
+      .addCase(addTodo.rejected, (state, { error }) => {
+        state.error = error.message ?? "Failed to add todo";
       })
-      .addCase(toggleTodo.fulfilled, (state, action) => {
-        const todo = state.todos.find(item => item.id === action.payload);
+      .addCase(toggleTodo.fulfilled, (state, { payload: id }) => {
+        const todo = state.todos.find(item => item.id === id);
         if (todo) {
           todo.completed = !todo.completed;
-          saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+          updateStorage(state);
         }
       })
-      .addCase(deleteTodo.fulfilled, (state, action) => {
-        state.todos = state.todos.filter(item => item.id !== action.payload);
+      .addCase(deleteTodo.fulfilled, (state, { payload: id }) => {
+        state.todos = state.todos.filter(item => item.id !== id);
         state.total -= 1;
-        saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+        calculatePagination(state);
+        updateStorage(state);
       })
-      .addCase(editTodo.fulfilled, (state, action) => {
-        const todo = state.todos.find(item => item.id === action.payload.id);
+      .addCase(editTodo.fulfilled, (state, { payload: { id, text } }) => {
+        const todo = state.todos.find(item => item.id === id);
         if (todo) {
-          todo.text = action.payload.text;
-          saveTodosToStorage(state.todos, TODOS_STORAGE_KEY);
+          todo.text = text;
+          updateStorage(state);
         }
       });
   },
