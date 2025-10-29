@@ -1,30 +1,27 @@
 import Grid from "@mui/material/Grid";
-import TodoItem, { type ITodoItem } from "../TodoItem/TodoItem";
+import TodoItem from "../TodoItem/TodoItem";
 import EditTodo from "../EditTodo/EditTodo";
 // import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { useEffect, useState } from "react";
-import { deleteTodo, editTodo, fetchTodos, setPage } from "../../store/slices/todosSlice";
-
-// export interface ITodoListProps {
-//   todos: ITodoItem[];
-//   todoIdForEdit: number | null;
-//   onToggleTodo: (id: number) => void;
-//   onDeleteTodo: (id: number) => void;
-//   onEditTodo: (id: number | null) => void;
-//   onSaveEdit: (id: number, newText: string) => void;
-// }
+import { useCallback, useEffect, useState } from "react";
+import {
+  deleteTodo,
+  editTodo,
+  fetchTodos,
+  setPage,
+  toggleTodo,
+} from "../../store/slices/todosSlice";
+import Text from "../Text/Text";
 
 export default function TodoList() {
   const {
-  todos: todos,
-  // totalPages,
-  page,
-  limit,
-  filter,
-  sortOrder,
-} = useAppSelector(state => state.todos);
+    todos: todos,
+    page,
+    limit,
+    filter,
+    sortOrder,
+  } = useAppSelector(state => state.todos);
   const [todoIdForEdit, setTodoIdForEdit] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,10 +30,8 @@ export default function TodoList() {
     todoIdForEdit !== null
       ? todos.find(todo => todo.id === todoIdForEdit)
       : undefined;
-  
-      const dispatch = useAppDispatch();
-  
 
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     setLoading(true);
@@ -53,60 +48,73 @@ export default function TodoList() {
     }
   }, [dispatch, page, limit, filter, sortOrder]);
 
-  const handleToggleTodo = async (id: number) => {
-    try {
-      await dispatch(toggleTodo(id)).unwrap();
-    } catch (err) {
-      console.error("Error toggling todo:", err);
-    }
-  };
-
-  const handleDeleteTodo = async (id: number) => {
-    try {
-      await dispatch(deleteTodo(id)).unwrap();
-      if (todos.length === 1 && page > 1) {
-        dispatch(setPage(page - 1));
-      } else {
-        dispatch(fetchTodos({ page, limit, filter, sortOrder }));
+  const handleToggleTodo = useCallback(
+    async (id: number) => {
+      try {
+        await dispatch(toggleTodo(id)).unwrap();
+      } catch (err) {
+        console.error("Error toggling todo:", err);
       }
-    } catch (err) {
-      console.error("Error deleting todo:", err);
-    }
-  };
+    },
+    [dispatch]
+  );
 
-  const handleSaveEdit = async (id: number, newText: string) => {
-    try {
-      await dispatch(editTodo({ id, text: newText })).unwrap();
-      setTodoIdForEdit(null);
-    } catch (err) {
-      console.error("Error adding todo:", err);
-    }
-  };
+  const handleDeleteTodo = useCallback(
+    async (id: number) => {
+      try {
+        await dispatch(deleteTodo(id)).unwrap();
+        if (todos.length === 1 && page > 1) {
+          dispatch(setPage(page - 1));
+        } else {
+          dispatch(fetchTodos({ page, limit, filter, sortOrder }));
+        }
+      } catch (err) {
+        console.error("Error deleting todo:", err);
+      }
+    },
+    [dispatch, todos.length, page, limit, filter, sortOrder]
+  );
 
-  const selectTodoIdForEdit = (id: number | null) => {
-    setTodoIdForEdit(id);
-  };
+  const handleSaveEdit = useCallback(
+    async (id: number, newText: string) => {
+      try {
+        await dispatch(editTodo({ id, text: newText })).unwrap();
+        setTodoIdForEdit(null);
+      } catch (err) {
+        console.error("Error adding todo:", err);
+      }
+    },
+    [dispatch]
+  );
+
   return (
-    <Box sx={{ mb: 4 }}>
-      {todoForEdit && onSaveEdit && onEditTodo && (
-        <EditTodo
-          todo={todoForEdit}
-          onSaveEdit={onSaveEdit}
-          onCancel={() => onEditTodo(null)}
-        />
-      )}
-      <Grid container direction='column'>
-        {todos.map(todo => (
-          <Grid key={todo.id} sx={{ width: "100%" }}>
-            <TodoItem
-              todo={todo}
-              onToggleTodo={onToggleTodo}
-              onDeleteTodo={onDeleteTodo}
-              onEditTodo={onEditTodo}
+    <>
+      {error && <Text variant='h6' mb={2} text={error} />}
+      {loading ? (
+        <Text variant='h6' mb={2} text='loading...' />
+      ) : (
+        <Box sx={{ mb: 4 }}>
+          {todoForEdit && handleSaveEdit && todoIdForEdit && (
+            <EditTodo
+              todo={todoForEdit}
+              onSaveEdit={handleSaveEdit}
+              onCancel={() => setTodoIdForEdit(null)}
             />
+          )}
+          <Grid container direction='column'>
+            {todos.map(todo => (
+              <Grid key={todo.id} sx={{ width: "100%" }}>
+                <TodoItem
+                  todo={todo}
+                  onToggleTodo={handleToggleTodo}
+                  onDeleteTodo={handleDeleteTodo}
+                  onEditTodo={setTodoIdForEdit}
+                />
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </Box>
+        </Box>
+      )}
+    </>
   );
 }

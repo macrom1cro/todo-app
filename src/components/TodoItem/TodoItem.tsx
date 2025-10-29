@@ -27,7 +27,7 @@ export interface ITodoItem {
   createdAt: Date;
 }
 
-export interface TodoItemProps {
+interface TodoItemProps {
   todo: ITodoItem;
   onToggleTodo: (id: number) => void;
   onDeleteTodo: (id: number) => void;

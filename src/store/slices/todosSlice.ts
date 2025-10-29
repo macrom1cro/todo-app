@@ -131,7 +131,7 @@ const updateStorage = (state: TodosState): void => {
 };
 
 const calculatePagination = (state: TodosState): void => {
-  state.totalPages = Math.ceil(state.total / state.limit);
+  state.totalPages = Math.ceil(state.total / state.limit) || 1;
 };
 
 const resetPagination = (state: TodosState): void => {
@@ -148,6 +148,10 @@ const todosSlice = createSlice({
     setLimit: (state, { payload }: PayloadAction<number>) => {
       state.limit = payload;
       calculatePagination(state);
+      const maxPage = Math.max(1, state.totalPages);
+      if (state.page > maxPage) {
+        state.page = maxPage;
+      }
     },
     setFilter: (state, { payload }: PayloadAction<FilterStatus>) => {
       state.filter = payload;
@@ -180,6 +184,9 @@ const todosSlice = createSlice({
         state.total = payload.total;
         state.totalPages = payload.totalPages;
         state.limit = payload.limit;
+        if (state.page > state.totalPages) {
+          state.page = state.totalPages;
+        }
         updateStorage(state);
       })
       .addCase(fetchTodos.rejected, (state, { error }) => {
