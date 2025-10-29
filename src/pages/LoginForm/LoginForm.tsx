@@ -71,7 +71,7 @@ function LoginForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault();//почитать
 
     const errors = {
       email: validateField("email", formData.email),
@@ -81,7 +81,7 @@ function LoginForm() {
     setValidationErrors(errors);
 
     if (Object.values(errors).some(error => error)) {
-      return;
+      return;//почитать
     }
     dispatch(loginUser(formData));
   };

@@ -18,7 +18,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   refreshToken: string | null;
-  status: "idle" | "loading" | "failed";
+  status: "idle" | "loading" | "failed"; //поправить
   error: string | null;
 }
 

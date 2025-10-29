@@ -22,7 +22,7 @@ class TokenManager {
     try {
       sessionStorage.setItem(this.REFRESH_TOKEN_KEY, token);
     } catch (error) {
-      console.log(error + "тут");
+      console.log(error);
       localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
     }
   }

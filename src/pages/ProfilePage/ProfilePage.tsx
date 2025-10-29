@@ -43,7 +43,7 @@ function ProfilePage() {
     if (!user) {
       setProfileLoading(true);
       dispatch(fetchUserProfile())
-        .unwrap()
+        .unwrap() //почитать
         .finally(() => setProfileLoading(false));
     }
   }, [dispatch, user]);
