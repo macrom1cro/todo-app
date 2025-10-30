@@ -7,6 +7,13 @@ import api from "../../api/api";
 import { isAxiosError } from "axios";
 import TokenManager from "../../utils/tokenManager";
 
+export const AuthStatus = {
+  IDLE: "idle",
+  LOADING: "loading",
+  FAILED: "failed",
+} as const;
+
+export type AuthStatus = (typeof AuthStatus)[keyof typeof AuthStatus];
 interface User {
   id: number;
   email: string;
@@ -18,7 +25,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   refreshToken: string | null;
-  status: "idle" | "loading" | "failed"; //поправить
+  status: AuthStatus; //поправить
   error: string | null;
 }
 
@@ -42,7 +49,7 @@ const initialState: AuthState = {
   user: null,
   token: localStorage.getItem("token"),
   refreshToken: localStorage.getItem("refreshToken"),
-  status: "idle",
+  status: AuthStatus.IDLE,
   error: null,
 };
 
@@ -187,65 +194,65 @@ const authSlice = createSlice({
   extraReducers: builder => {
     builder
       .addCase(registerUser.pending, state => {
-        state.status = "loading";
+        state.status = AuthStatus.LOADING;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = AuthStatus.IDLE;
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = AuthStatus.FAILED;
         state.error = action.payload as string;
       })
       .addCase(loginUser.pending, state => {
-        state.status = "loading";
+        state.status = AuthStatus.LOADING;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = AuthStatus.IDLE;
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = AuthStatus.FAILED;
         state.error = action.payload as string;
       })
       .addCase(fetchUserProfile.pending, state => {
-        state.status = "loading";
+        state.status = AuthStatus.LOADING;
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = AuthStatus.IDLE;
         state.user = action.payload;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = AuthStatus.FAILED;
         state.error = action.payload as string;
       })
       .addCase(changePassword.pending, state => {
-        state.status = "loading";
+        state.status = AuthStatus.LOADING;
         state.error = null;
       })
       .addCase(changePassword.fulfilled, state => {
-        state.status = "idle";
+        state.status = AuthStatus.IDLE;
         state.error = null;
       })
       .addCase(changePassword.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = AuthStatus.FAILED;
         state.error = action.payload as string;
       })
       .addCase(initializeAuth.pending, state => {
-        state.status = "loading";
+        state.status = AuthStatus.LOADING;
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = AuthStatus.IDLE;
         state.token = action.payload.token;
       })
       .addCase(initializeAuth.rejected, state => {
-        state.status = "failed";
+        state.status = AuthStatus.FAILED;
         state.token = null;
         state.refreshToken = null;
         state.user = null;

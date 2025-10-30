@@ -64,6 +64,7 @@ function LoginForm() {
     }));
 
     const error = validateField(name, value);
+    
     setValidationErrors(prev => ({
       ...prev,
       [name]: error,
